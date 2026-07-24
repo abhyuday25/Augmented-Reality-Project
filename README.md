@@ -2,7 +2,7 @@
 
 Project for the course **Interaction and User Experience (VR/AR)**.
 
-<img width="1440" height="900" alt="Image" src="https://github.com/user-attachments/assets/c86ffd17-c35d-4bbe-8dca-250e4f6417e5" />
+<img width="1440" height="900" alt="Image" src="src/assets/images/readmess.png" />
 
 ### Goal (summary)
 
