@@ -49,7 +49,7 @@ Then open `http://localhost:8000/`.
 - `index.html`: main page (A‑Frame scene + UI).
 - `src/css/style.css`: UI styles.
 - `src/js/app.js`: main logic (UI + A‑Frame components + audio + voice).
-- `src/assets/models/museu.glb`: 3D museum model.
+- `src/assets/models/q.glb`: 3D museum model.
 - `src/assets/*`: placeholders for local media (replace with your own files if you want).
 
 ### Credits / references

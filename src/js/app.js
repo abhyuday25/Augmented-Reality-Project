@@ -477,6 +477,10 @@ function imageUrlForPainting(p) {
   if (!code) return "";
 
   const folderByType = {
+    baroque: "room1",
+    romanticism: "room2",
+    cubism: "room3",
+    impressionism: "room4",
     room1: "room1",
     room2: "room2",
     room3: "room3",
@@ -486,7 +490,7 @@ function imageUrlForPainting(p) {
   const folder = folderByType[type];
   if (!folder) return "";
   const ext = code === "038" ? "jpeg" : "jpg";
-  return `src/assets/images/${folder}/${code}.${ext}`;
+  return `src/assets/images/${folder}/${code}.${ext}?t=${Date.now()}`;
 }
 
 function formatPaintingDesc(p) {
