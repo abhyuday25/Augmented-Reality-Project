@@ -477,6 +477,10 @@ function imageUrlForPainting(p) {
   if (!code) return "";
 
   const folderByType = {
+    history: "room1",
+    academics: "room2",
+    achievements: "room3",
+    studentlife: "room4",
     baroque: "room1",
     romanticism: "room2",
     cubism: "room3",

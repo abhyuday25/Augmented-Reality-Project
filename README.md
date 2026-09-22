@@ -2,7 +2,6 @@
 
 Project for the course **Interaction and User Experience (VR/AR)**.
 
-<img width="1440" height="900" alt="Image" src="src/assets/images/readmess.png" />
 
 ### Goal (summary)
 
@@ -33,26 +32,77 @@ Create a **desktop/mobile VR** virtual museum experience with an **automatic gui
 - **Smartphone/tablet**: touch (look-controls) + UI; (optional) gyroscope via browser.
 - **Software**: A‑Frame 1.5; WebAudio/Tone.js; Web Speech API (when supported).
 
-### How to run
+### How to Run
 
-Recommended to serve via HTTP (ES modules and media load more reliably this way).
-
+#### 1. (Optional) Re-generate the 3D GLB Model
+If you made changes to the museum procedural code or 3D assets:
 ```bash
-cd /Users/tn/Documents/uni/ieedu/virtumuseum
-python3 -m http.server 8000
+python scripts/generate_vit_museum.py
 ```
 
-Then open `http://localhost:8000/`.
+#### 2. Start a Local HTTP Server
+Run from the project root directory:
+
+**Option A (Python):**
+```bash
+python -m http.server 8000
+```
+
+**Option B (Node.js - Disables caching automatically):**
+```bash
+npx http-server -c-1 -p 8000
+```
+
+Then open `http://localhost:8000/` in your browser.
+
+---
+
+### Fixing "Updated Code / Assets Not Showing" (Browser Cache Issue)
+
+Web browsers heavily cache 3D `.glb` models, JavaScript, and JSON files in memory. If your changes are not appearing on `localhost:8000`:
+
+1. **Hard Refresh the Browser:**
+   - Windows/Linux: Press **`Ctrl + F5`** or **`Ctrl + Shift + R`**
+   - Mac: Press **`Cmd + Shift + R`**
+2. **Disable Cache via DevTools (Recommended):**
+   - Open Developer Tools (**`F12`** or Right Click → **Inspect**).
+   - Go to the **Network** tab.
+   - Check the **"Disable cache"** checkbox.
+   - Keep DevTools open while developing and refreshing.
+3. **Open in Private / Incognito Window:**
+   - Press **`Ctrl + Shift + N`** (Chrome/Edge) or **`Ctrl + Shift + P`** (Firefox) and visit `http://localhost:8000/`.
+4. **Kill Stale Server Processes:**
+   - Ensure an old background server instance isn't occupying port 8000 from another directory.
+
+---
 
 ### Project structure
 
-- `index.html`: main page (A‑Frame scene + UI).
-- `src/css/style.css`: UI styles.
-- `src/js/app.js`: main logic (UI + A‑Frame components + audio + voice).
-- `src/assets/models/q.glb`: 3D museum model.
-- `src/assets/*`: placeholders for local media (replace with your own files if you want).
+- `index.html`: Main entry page (A‑Frame 3D scene + UI overlay).
+- `scripts/generate_vit_museum.py`: Procedural GLB model generator.
+- `src/css/style.css`: UI styles & layout.
+- `src/js/app.js`: Museum application logic (A-Frame components, guided tour, audio, interaction).
+- `src/data/tourStops.json`: Guided tour stops, camera coordinates, and narration text.
+- `src/data/paintings.json`: Exhibit descriptions, historical archives, and metadata.
+- `src/assets/models/vit_vellore_virtual_museum.glb`: 3D museum model asset.
+- `vit_vellore_virtual_museum.glb`: Root 3D museum GLB bundle.
 
 ### Credits / references
 
-- A‑Frame examples: `https://aframe.io/aframe/examples/`
+- A‑Frame: `https://aframe.io/`
 - VR heuristics (NN/g): `https://www.nngroup.com/articles/usability-heuristics-virtual-reality/`
+
+
+### Instructions
+
+Model Regeneration:
+bash
+python scripts/generate_vit_museum.py
+Local HTTP Server Commands:
+python -m http.server 8000
+npx http-server -c-1 -p 8000 (auto cache disable)
+Browser Cache Bypassing:
+Hard reload: Ctrl + F5 / Ctrl + Shift + R (Cmd + Shift + R on Mac).
+DevTools: F12 → Network tab → check Disable cache.
+Incognito mode.
+Updated File Structure.
