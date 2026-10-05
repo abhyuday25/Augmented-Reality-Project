@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>VIT Vellore Virtual Museum</title>
-    <link rel="icon" href="src/assets/images/b.png" type="image/png" />
+    <title>VIT Vellore Virtual Museum — Two-Floor Interactive Tour</title>
+    <meta name="description" content="Explore Vellore Institute of Technology (VIT), Vellore in an interactive two-floor 3D virtual museum tour covering history, academics, research, achievements, and student life." />
+    <link rel="icon" href="src/assets/images/vit/vit_logo_official.png" type="image/png" />
 
-    <!-- Suppress noisy vendor console output (A-Frame/THREE banners, legacy lights warning).
-         To re-enable temporarily: add ?console=1 to the URL or set localStorage.virtumuseum.console=1 -->
+    <!-- Suppress noisy vendor console output -->
     <script>
       (function () {
         try {
@@ -52,9 +52,7 @@
             if (shouldSuppress(args)) return;
             origWarn(...args);
           };
-        } catch {
-          // noop
-        }
+        } catch {}
       })();
     </script>
 
@@ -68,35 +66,29 @@
   </head>
 
   <body>
-    <!-- Welcome / Onboarding -->
+    <!-- Welcome / Start Screen -->
     <div class="welcome" id="welcome">
       <div class="welcome__card">
-        <div class="welcome__brand">VIT Vellore</div>
-        <div class="welcome__title">Welcome to VIT Vellore Virtual Museum</div>
+        <div class="welcome__brand">Vellore Institute of Technology</div>
+        <div class="welcome__title">VIT Vellore Virtual Museum</div>
         <div class="welcome__subtitle">
-          Explore the heritage, academic innovation, and achievements of VIT Vellore.
-          Walk freely (WASD + mouse) or take a guided tour across iconic exhibits.
+          Step into a two-floor interactive 3D digital museum dedicated to VIT Vellore.
+          Follow the 16-stop guided tour or walk freely across both floors to explore four decades of academic leadership, transformative research, and campus life.
         </div>
 
         <div class="welcome__buttons">
-          <button id="btnEnterExplore">Explore freely</button>
-          <button id="btnEnterTour" class="secondary">Guided tour</button>
-          <button id="btnFullscreenWelcome" class="secondary">
-            Fullscreen
-          </button>
+          <button id="btnEnterTour" class="primary">Start Guided Tour</button>
+          <button id="btnEnterExplore" class="secondary">Explore Freely</button>
+          <button id="btnFullscreenWelcome" class="secondary">Fullscreen</button>
         </div>
 
         <div class="welcome__opts">
           <label class="ui__row">
             <input type="checkbox" id="chkWelcomeAmbient" />
-            <span>Ambient music</span>
+            <span>Ambient museum sound</span>
           </label>
-          <!--   <label class="ui__row">
-            <input type="checkbox" id="chkWelcomeTTS" />
-            <span>Voice narration (TTS)</span>
-          </label> -->
           <label class="ui__row ui__row--split">
-            <span>Movement speed</span>
+            <span>Walking speed</span>
             <input
               id="rngMoveSpeed"
               type="range"
@@ -109,53 +101,60 @@
         </div>
 
         <div class="welcome__hint">
-          Tip: <b>M</b> opens the menu · <b>H</b> HUD on/off · <b>Q</b>/<b>E</b>
-          prev/next · guided tour: use ←/→ (or Q/E)
+          <b>Controls:</b> WASD / Arrows to walk · Mouse to look · <b>E</b> / Click to inspect · <b>M</b> Museum Map · <b>T</b> Tour · <b>Esc</b> Close
         </div>
       </div>
     </div>
 
+    <!-- UI Overlay Bar -->
     <div class="ui is-hidden" id="uiRoot">
       <div class="ui__bar">
         <button id="btnMenu" class="secondary" title="Menu (M)">Menu</button>
-        <button id="btnStop" class="secondary" title="End guided tour (Esc)">
-          End tour
-        </button>
-        <button id="btnHUD" class="secondary" title="HUD on/off (H)">
-          HUD
-        </button>
-        <button id="btnFullscreen" class="secondary">Fullscreen</button>
+        <button id="btnMap" class="secondary" title="Museum Map (M)">Map (M)</button>
+        <button id="btnTourBar" class="secondary" title="Guided Tour (T)">Tour</button>
+        <button id="btnElevatorQuick" class="secondary" title="Floor Transition">Switch Floor</button>
+        <button id="btnHUD" class="secondary" title="HUD on/off (H)">HUD</button>
+        <button id="btnFullscreen" class="secondary" title="Toggle Fullscreen">Fullscreen</button>
       </div>
 
+      <!-- Real-time Floor & Section Indicator -->
+      <div class="hudFloorBadge" id="hudFloorIndicator" title="Click to Switch Floors">
+        <span class="hudFloorNum" id="hudFloorNum">FLOOR 1</span>
+        <span class="hudFloorName" id="hudFloorName">THE VIT JOURNEY</span>
+      </div>
+
+      <!-- Backdrop for Modal Menus -->
       <div class="ui__backdrop" id="menuBackdrop" aria-hidden="true"></div>
 
+      <!-- Side Menu Panel -->
       <div class="ui__panel" id="menuPanel" aria-hidden="true">
         <div class="ui__panelHeader">
-          <div class="ui__title">VirtuMuseum</div>
-          <div class="ui__subtitle">Interactive Virtual Museum</div>
+          <div class="ui__title">VIT Vellore Museum</div>
+          <div class="ui__subtitle">Two-Floor Interactive Virtual Exhibition</div>
         </div>
 
         <div class="ui__section">
           <div class="ui__buttons">
-            <button id="btnBackToWelcome" class="secondary">
-              Back to start screen
+            <button id="btnBackToWelcome" class="secondary" style="width: 100%;">
+              Back to Start Screen
             </button>
           </div>
         </div>
 
         <div class="ui__section">
-          <div class="ui__sectionTitle">
-            Sound
-            <!-- & Narration -->
+          <div class="ui__sectionTitle">Floor Transition</div>
+          <div class="ui__buttons" style="display: flex; gap: 8px;">
+            <button id="btnMenuFloor1" class="secondary" style="flex: 1;">Floor 1 (Ground)</button>
+            <button id="btnMenuFloor2" class="secondary" style="flex: 1;">Floor 2 (Upper)</button>
           </div>
+        </div>
+
+        <div class="ui__section">
+          <div class="ui__sectionTitle">Sound & Audio</div>
           <label class="ui__row">
             <input type="checkbox" id="chkAmbient" />
-            <span>Ambient music (calm)</span>
+            <span>Ambient museum ambience</span>
           </label>
-          <!--   <label class="ui__row">
-            <input type="checkbox" id="chkTTS" />
-            <span>Voice narration (TTS)</span>
-          </label> -->
           <label class="ui__row ui__row--split">
             <span>Volume</span>
             <input id="rngVolume" type="range" min="0" max="100" value="60" />
@@ -163,253 +162,313 @@
         </div>
 
         <div class="ui__section">
-          <div class="ui__sectionTitle">Experience</div>
+          <div class="ui__sectionTitle">Experience & Controls</div>
           <label class="ui__row">
             <input type="checkbox" id="chkReducedMotion" />
-            <span>Reduce motion (transitions)</span>
-          </label>
-          <label class="ui__row ui__row--split">
-            <span>Tour speed</span>
-            <input id="rngSpeed" type="range" min="50" max="150" value="100" />
-          </label>
-          <label class="ui__row ui__row--split">
-            <span>Zoom</span>
-            <input
-              id="rngZoom"
-              type="range"
-              min="30"
-              max="90"
-              step="1"
-              value="80"
-            />
+            <span>Reduce motion (instant transitions)</span>
           </label>
           <label class="ui__row ui__row--split">
             <span>Movement speed</span>
-            <input
-              id="rngMoveSpeedMenu"
-              type="range"
-              min="1"
-              max="6"
-              step="0.5"
-              value="2"
-            />
+            <input id="rngMoveSpeedMenu" type="range" min="1" max="6" step="0.5" value="2" />
+          </label>
+          <label class="ui__row ui__row--split">
+            <span>Field of view (Zoom)</span>
+            <input id="rngZoom" type="range" min="30" max="90" step="1" value="80" />
           </label>
         </div>
 
-        <!--    <div class="ui__section"> -->
-        <!--  <div class="ui__sectionTitle">Modo 360</div>
-          <div class="ui__buttons">
-            <button id="btnModeMuseum" class="secondary">3D Museum</button>
-            <button id="btnModePano" class="secondary">Panorama 360</button>
-            <button id="btnModeVideo" class="secondary">360 Video</button> -->
-        <!--  </div> -->
-        <!--   <label class="ui__row ui__row--stack">
-            <span>URL panorama (jpg/png)</span>
-            <input
-              id="txtPanoUrl"
-              placeholder="ex: src/assets/images/panorama.jpg"
-            />
-          </label> -->
-        <!--   <label class="ui__row ui__row--stack">
-            <span>360 video URL (mp4)</span>
-            <input
-              id="txtVideoUrl"
-              placeholder="ex: src/assets/video/video360.mp4"
-            />
-          </label>
-          <div class="ui__buttons">
-            <button id="btnApply360" class="secondary">Apply</button>
-          </div>
-        </div>
- -->
-        <div class="ui__section ui__section--stops" id="stopsSection">
-          <div class="ui__sectionTitle">Teleports (stops)</div>
+        <div class="ui__section">
+          <div class="ui__sectionTitle">Guided Tour Stops (16)</div>
           <div id="stopsList" class="ui__list"></div>
         </div>
 
         <div class="ui__section">
-          <div class="ui__sectionTitle">Voice (commands)</div>
-          <div class="ui__buttons">
-            <button id="btnVoice" class="secondary">Enable voice</button>
-            <button id="btnHelp" class="secondary">Help</button>
-          </div>
-          <div class="ui__hint" id="voiceStatus">Voice: off</div>
-        </div>
-
-        <div class="ui__section">
-          <div class="ui__sectionTitle">Tools</div>
-          <div class="ui__buttons">
-            <button id="btnPhoto" class="secondary" title="Photo (C)">
-              Photo
-            </button>
-            <button id="btnFlashlight" class="secondary" title="Flashlight (F)">
-              Flashlight
-            </button>
-            <!--   <button
-              id="btnReset"
-              class="secondary"
-              title="Reset position/rotation"
-            >
-              Reset
-            </button> -->
-            <!--   <button
-              id="btnCopyPose"
-              class="secondary"
-              title="Copy current position/rotation"
-            >
-              Copy pose
-            </button> -->
-          </div>
+          <div class="ui__sectionTitle">Official Resources</div>
           <div class="ui__hint">
-            Extra: <b>Q</b>/<b>E</b> prev/next · <b>C</b> photo · <b>F</b>
-            flashlight
+            <a href="https://vit.ac.in" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: underline;">
+              Official VIT Website (vit.ac.in) ↗
+            </a>
           </div>
         </div>
-
-        <div class="ui__section ui__section--foot">
-          <div class="ui__hint">
-            Shortcuts: <b>M</b> menu · <b>Enter</b> start ·
-            <!--  <b>Space</b> pausa/retoma · -->
-            <b>N</b> next · <b>Esc</b> stop
-          </div>
-        </div>
-      </div>
-
-      <div class="tourNav is-hidden" id="tourNav" aria-hidden="true">
-        <button
-          id="btnTourPrev"
-          class="secondary ui__tourBtn"
-          title="Previous (←)"
-        >
-          ←
-        </button>
-        <button id="btnTourNext" class="secondary ui__tourBtn" title="Next (→)">
-          →
-        </button>
       </div>
     </div>
 
-    <!-- Joystick (mobile) — only shown in free exploration -->
+    <!-- Guided Tour Progress Bar (Top Center) -->
+    <div class="tourProgress is-hidden" id="tourProgress">
+      <span class="tourProgress__step" id="tourProgressStep">01 / 16</span>
+      <span class="tourProgress__title" id="tourProgressTitle">Welcome to VIT Vellore</span>
+      <div class="tourProgress__actions">
+        <button id="btnTourPrevBar" class="secondary" title="Previous Stop (←)">←</button>
+        <button id="btnTourNextBar" class="primary" title="Next Stop (→)">→</button>
+        <button id="btnTourMap" class="secondary" title="View on Map">Map</button>
+        <button id="btnTourEndBar" class="secondary" title="Exit Tour (Esc)">Exit</button>
+      </div>
+    </div>
+
+    <!-- Interactive Bottom Interaction Prompt -->
+    <div class="interactionPrompt is-hidden" id="interactionPrompt">
+      <span class="interactionPrompt__key">E</span>
+      <span class="interactionPrompt__text" id="interactionPromptText">Explore Exhibit</span>
+    </div>
+
+    <!-- Responsive Museum Exhibit Information Drawer -->
+    <aside class="exhibitDrawer" id="exhibitDrawer" role="dialog" aria-modal="false" aria-labelledby="exhibitTitle">
+      <div class="exhibitDrawer__header">
+        <div class="exhibitDrawer__badges">
+          <span class="badge badge--floor" id="exhibitFloorBadge">Floor 1</span>
+          <span class="badge badge--category" id="exhibitCategoryBadge">History</span>
+          <span class="badge badge--year" id="exhibitYearBadge">1984</span>
+        </div>
+        <button class="secondary exhibitDrawer__close" id="btnExhibitClose" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="exhibitDrawer__media">
+        <img class="exhibitDrawer__img" id="exhibitImg" src="" alt="Exhibit visual" />
+        <div class="exhibitDrawer__imgFallback is-hidden" id="exhibitImgFallback">
+          <span>🏛️ Vellore Institute of Technology</span>
+        </div>
+      </div>
+
+      <div class="exhibitDrawer__body">
+        <h2 class="exhibitDrawer__title" id="exhibitTitle">—</h2>
+        <div class="exhibitDrawer__subtitle" id="exhibitSubtitle">—</div>
+        <div class="exhibitDrawer__desc" id="exhibitDesc">—</div>
+
+        <div class="exhibitDrawer__facts" id="exhibitFactsBox">
+          <div class="exhibitDrawer__factsHeading">Key Facts & Verified Milestones</div>
+          <ul class="exhibitDrawer__factsList" id="exhibitFactsList"></ul>
+        </div>
+
+        <div class="exhibitDrawer__provenance" id="exhibitProvenanceBox">
+          <span class="provenanceLabel">Verified Official Source</span>
+          <a class="provenanceLink" id="exhibitSourceLink" href="https://vit.ac.in" target="_blank" rel="noopener noreferrer">vit.ac.in</a>
+        </div>
+      </div>
+
+      <div class="exhibitDrawer__footer">
+        <button class="secondary" id="btnExhibitPrev">← Previous Exhibit</button>
+        <button class="secondary" id="btnExhibitNext">Next Exhibit →</button>
+      </div>
+    </aside>
+
+    <!-- Interactive Museum Map Modal -->
+    <div class="modal is-hidden" id="mapModal" role="dialog" aria-modal="true" aria-labelledby="mapModalTitle">
+      <div class="modal__backdrop" id="mapModalBackdrop"></div>
+      <div class="modal__card modal__card--map">
+        <div class="modal__header">
+          <div>
+            <div class="modal__title" id="mapModalTitle">VIT Vellore Virtual Museum Map</div>
+            <div class="modal__subtitle">Click any wing or tour stop to fast-travel</div>
+          </div>
+          <button class="secondary modal__close" id="btnMapModalClose" aria-label="Close">✕</button>
+        </div>
+
+        <div class="mapTabs">
+          <button class="mapTab is-active" id="btnMapTabF1">Floor 1 • The VIT Journey</button>
+          <button class="mapTab" id="btnMapTabF2">Floor 2 • Innovation & Impact</button>
+        </div>
+
+        <div class="mapViewport" id="mapViewport">
+          <!-- Floor 1 SVG -->
+          <svg class="mapSvg" id="mapSvgFloor1" viewBox="-22 -18 44 38">
+            <rect x="-20" y="-17" width="40" height="35" fill="#0d1b33" stroke="#2563eb" stroke-width="0.4" rx="1.5" />
+            <!-- Welcome Lobby -->
+            <rect id="mapZoneLobby" class="mapZone" x="-10" y="8" width="20" height="9.5" fill="#1e3a8a" fill-opacity="0.4" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
+            <text x="0" y="13" fill="#cbd5e1" font-size="1.4" font-weight="700" text-anchor="middle">Welcome Lobby</text>
+            <!-- History Wing -->
+            <rect id="mapZoneHistory" class="mapZone" x="-18.5" y="-15" width="8" height="22" fill="#1e3a8a" fill-opacity="0.3" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
+            <text x="-14.5" y="-4" fill="#cbd5e1" font-size="1.3" font-weight="700" text-anchor="middle" transform="rotate(-90 -14.5 -4)">Origins & Evolution (1984–2024)</text>
+            <!-- Academics Wing -->
+            <rect id="mapZoneAcademics" class="mapZone" x="10.5" y="-15" width="8" height="22" fill="#1e3a8a" fill-opacity="0.3" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
+            <text x="14.5" y="-4" fill="#cbd5e1" font-size="1.3" font-weight="700" text-anchor="middle" transform="rotate(90 14.5 -4)">Academics, Schools & FFCS</text>
+            <!-- Central Atrium -->
+            <rect id="mapZoneAtrium" class="mapZone" x="-8" y="-7" width="16" height="13" fill="#0a1426" stroke="#d4af37" stroke-dasharray="0.8 0.4" stroke-width="0.4" rx="1" />
+            <!-- Central Monument -->
+            <rect x="-2.2" y="-3.2" width="4.4" height="2.4" fill="#d4af37" fill-opacity="0.5" stroke="#f59e0b" stroke-width="0.3" rx="0.4" />
+            <text x="0" y="-1.8" fill="#ffffff" font-size="1.0" font-weight="700" text-anchor="middle">VIT Monument</text>
+            <!-- Campus Model -->
+            <rect x="-2.2" y="2.8" width="4.4" height="2.8" fill="#3b82f6" fill-opacity="0.5" stroke="#60a5fa" stroke-width="0.3" rx="0.4" />
+            <text x="0" y="4.4" fill="#ffffff" font-size="1.0" font-weight="700" text-anchor="middle">Campus Model</text>
+            <!-- Grand Staircase -->
+            <rect id="mapZoneStairsF1" class="mapZone" x="11.0" y="7.0" width="3.2" height="7.5" fill="#8b5cf6" fill-opacity="0.5" stroke="#a78bfa" stroke-width="0.3" rx="0.4" />
+            <text x="12.6" y="11.0" fill="#ffffff" font-size="1.1" font-weight="700" text-anchor="middle">Stairs ↑</text>
+            <!-- Elevator -->
+            <rect id="mapZoneElevatorF1" class="mapZone" x="15.0" y="11.0" width="2.5" height="3.5" fill="#10b981" fill-opacity="0.5" stroke="#34d399" stroke-width="0.3" rx="0.4" />
+            <text x="16.25" y="13.0" fill="#ffffff" font-size="1.0" font-weight="700" text-anchor="middle">Lift</text>
+            <!-- Tour stops on Floor 1 -->
+            <g id="mapTourPinsF1"></g>
+            <!-- Player Beacon -->
+            <circle id="playerBeaconF1" class="mapPlayerBeacon" cx="0" cy="15" r="1.2" fill="#3b82f6" stroke="#ffffff" stroke-width="0.4" />
+          </svg>
+
+          <!-- Floor 2 SVG (Hidden initially) -->
+          <svg class="mapSvg is-hidden" id="mapSvgFloor2" viewBox="-22 -18 44 38">
+            <rect x="-20" y="-17" width="40" height="35" fill="#0d1b33" stroke="#2563eb" stroke-width="0.4" rx="1.5" />
+            <!-- Atrium Opening -->
+            <rect x="-7" y="-6" width="14" height="11" fill="#070c18" stroke="#d4af37" stroke-width="0.5" stroke-dasharray="0.8 0.4" rx="1" />
+            <text x="0" y="0" fill="#d4af37" font-size="1.2" font-weight="700" text-anchor="middle">Open Atrium (Overlooking Floor 1)</text>
+            <!-- Research Wing -->
+            <rect id="mapZoneResearch" class="mapZone" x="-18.5" y="-15" width="10.5" height="22" fill="#1e3a8a" fill-opacity="0.4" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
+            <text x="-13.5" y="-4" fill="#cbd5e1" font-size="1.3" font-weight="700" text-anchor="middle" transform="rotate(-90 -13.5 -4)">Research, Labs & VITTBI</text>
+            <!-- Research Table -->
+            <circle x="-12.5" y="-4" r="2.0" fill="#2563eb" fill-opacity="0.6" stroke="#d4af37" stroke-width="0.3" />
+            <text x="-12.5" y="-3.6" fill="#ffffff" font-size="0.9" font-weight="700" text-anchor="middle">Research Table</text>
+            <!-- Achievements Wall -->
+            <rect id="mapZoneAchievements" class="mapZone" x="2" y="-16.2" width="14" height="4.0" fill="#1e3a8a" fill-opacity="0.4" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
+            <text x="9" y="-14.0" fill="#cbd5e1" font-size="1.2" font-weight="700" text-anchor="middle">Wall of Achievements (NIRF, NAAC)</text>
+            <!-- Global VIT -->
+            <rect id="mapZoneGlobal" class="mapZone" x="-6.5" y="10" width="13" height="4.5" fill="#1e3a8a" fill-opacity="0.4" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
+            <text x="0" y="12.5" fill="#cbd5e1" font-size="1.2" font-weight="700" text-anchor="middle">Global Connections & SAP</text>
+            <!-- Student Life Wing -->
+            <rect id="mapZoneLife" class="mapZone" x="8" y="-15" width="10.5" height="22" fill="#1e3a8a" fill-opacity="0.4" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
+            <text x="13.5" y="-4" fill="#cbd5e1" font-size="1.3" font-weight="700" text-anchor="middle" transform="rotate(90 13.5 -4)">Riviera, graVITas & Student Life</text>
+            <!-- Staircase Exit -->
+            <rect id="mapZoneStairsF2" class="mapZone" x="11.0" y="7.0" width="3.2" height="7.5" fill="#8b5cf6" fill-opacity="0.5" stroke="#a78bfa" stroke-width="0.3" rx="0.4" />
+            <text x="12.6" y="11.0" fill="#ffffff" font-size="1.1" font-weight="700" text-anchor="middle">Stairs ↓</text>
+            <!-- Elevator -->
+            <rect id="mapZoneElevatorF2" class="mapZone" x="15.0" y="11.0" width="2.5" height="3.5" fill="#10b981" fill-opacity="0.5" stroke="#34d399" stroke-width="0.3" rx="0.4" />
+            <text x="16.25" y="13.0" fill="#ffffff" font-size="1.0" font-weight="700" text-anchor="middle">Lift</text>
+            <!-- Tour stops on Floor 2 -->
+            <g id="mapTourPinsF2"></g>
+            <!-- Player Beacon -->
+            <circle id="playerBeaconF2" class="mapPlayerBeacon" cx="12.5" cy="14" r="1.2" fill="#3b82f6" stroke="#ffffff" stroke-width="0.4" />
+          </svg>
+        </div>
+
+        <div class="mapLegend">
+          <span class="mapLegend__item"><span class="legendPin legendPin--you"></span> You Are Here</span>
+          <span class="mapLegend__item"><span class="legendPin legendPin--stop"></span> Tour Stop</span>
+          <span class="mapLegend__item"><span class="legendPin legendPin--visited">✓</span> Visited</span>
+          <span class="mapLegend__item"><span class="legendPin legendPin--stair">↑</span> Grand Staircase / Elevator</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Campus Model Explorer Modal -->
+    <div class="modal is-hidden" id="campusModal" role="dialog" aria-modal="true" aria-labelledby="campusModalTitle">
+      <div class="modal__backdrop" id="campusModalBackdrop"></div>
+      <div class="modal__card">
+        <div class="modal__header">
+          <div>
+            <div class="modal__title" id="campusModalTitle">VIT Vellore Campus Landmarks</div>
+            <div class="modal__subtitle">Explore iconic buildings across the 372-acre campus</div>
+          </div>
+          <button class="secondary modal__close" id="btnCampusModalClose" aria-label="Close">✕</button>
+        </div>
+        <div class="modal__body">
+          <div class="clusterGrid">
+            <div class="clusterCard" data-landmark="tt">
+              <div class="clusterCard__title">Technology Tower (TT)</div>
+              <div class="clusterCard__sub">Computing & Software Engineering Hub</div>
+              <div class="clusterCard__desc">Multi-story academic block accommodating supercomputing centers, software development labs, and SCOPE faculty.</div>
+            </div>
+            <div class="clusterCard" data-landmark="sjt">
+              <div class="clusterCard__title">Silver Jubilee Tower (SJT)</div>
+              <div class="clusterCard__sub">Smart Classrooms & Quadrangle</div>
+              <div class="clusterCard__desc">Built for the 25th anniversary, featuring amphitheater classrooms, multimedia podiums, and multidisciplinary schools.</div>
+            </div>
+            <div class="clusterCard" data-landmark="library">
+              <div class="clusterCard__title">Periyar Central Library</div>
+              <div class="clusterCard__sub">Six-Floor Knowledge Repository</div>
+              <div class="clusterCard__desc">Housing over 300,000 print volumes, automated RFID checkouts, and 24-hour reading study spaces.</div>
+            </div>
+            <div class="clusterCard" data-landmark="admin">
+              <div class="clusterCard__title">Main Administrative Building</div>
+              <div class="clusterCard__sub">Governance & International Relations</div>
+              <div class="clusterCard__desc">The historic governance center of VIT, fronted by palm-lined lawns and ceremonial quadrangle.</div>
+            </div>
+            <div class="clusterCard" data-landmark="auditorium">
+              <div class="clusterCard__title">Anna Auditorium</div>
+              <div class="clusterCard__sub">Convention & Cultural Arena</div>
+              <div class="clusterCard__desc">1,800-seat acoustic convention hall hosting international conferences, convocations, and stage arts.</div>
+            </div>
+            <div class="clusterCard" data-landmark="hostels">
+              <div class="clusterCard__title">Student Residential Blocks</div>
+              <div class="clusterCard__sub">Modern Living for 25,000+ Scholars</div>
+              <div class="clusterCard__desc">High-rise residential towers including S & T Blocks with biometric security and international food courts.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Research Portal Modal -->
+    <div class="modal is-hidden" id="researchModal" role="dialog" aria-modal="true" aria-labelledby="researchModalTitle">
+      <div class="modal__backdrop" id="researchModalBackdrop"></div>
+      <div class="modal__card">
+        <div class="modal__header">
+          <div>
+            <div class="modal__title" id="researchModalTitle">Strategic Research Clusters & Laboratories</div>
+            <div class="modal__subtitle">Browse key innovation themes, funded patents, and startup ventures</div>
+          </div>
+          <button class="secondary modal__close" id="btnResearchModalClose" aria-label="Close">✕</button>
+        </div>
+        <div class="modal__body">
+          <div class="clusterGrid">
+            <div class="clusterCard">
+              <div class="clusterCard__title">Artificial Intelligence & Robotics</div>
+              <div class="clusterCard__sub">Autonomous Systems & Deep Learning</div>
+              <div class="clusterCard__desc">Research in UAV drone swarms, edge computer vision, and assistive robotics sponsored by DRDO and MeitY.</div>
+            </div>
+            <div class="clusterCard">
+              <div class="clusterCard__title">Clean Energy & Electric Mobility</div>
+              <div class="clusterCard__sub">Green Hydrogen & EV Battery Tech</div>
+              <div class="clusterCard__desc">Automotive Research Centre testing high energy density batteries, EV motor drives, and solar microgrid integrations.</div>
+            </div>
+            <div class="clusterCard">
+              <div class="clusterCard__title">Biomedical Nanotechnology</div>
+              <div class="clusterCard__sub">Cancer Theranostics & Biomaterials</div>
+              <div class="clusterCard__desc">CBCMT laboratory developing 3D bioprinted scaffolds, targeted nanoparticle drug delivery, and biosensors.</div>
+            </div>
+            <div class="clusterCard">
+              <div class="clusterCard__title">VITTBI Startup Incubator</div>
+              <div class="clusterCard__sub">150+ Technology Startups</div>
+              <div class="clusterCard__desc">DST-supported Technology Business Incubator providing seed capital, IP guidance, and corporate acceleration.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Virtual Joystick -->
     <div class="joystick is-hidden" id="mobileJoystick" aria-hidden="true">
       <div class="joystick__base" id="mobileJoystickBase">
         <div class="joystick__stick" id="mobileJoystickStick"></div>
       </div>
     </div>
 
-    <!-- Info card (HTML) -->
-    <div
-      class="infoCard is-hidden"
-      id="infoCard"
-      role="dialog"
-      aria-live="polite"
-    >
-      <div class="infoCard__top">
-        <div class="infoCard__title" id="infoCardTitle">—</div>
-        <div class="infoCard__actions">
-          <button
-            class="infoCard__action secondary"
-            id="btnInfoImgToggle"
-            title="Show/hide image"
-          >
-            Image
-          </button>
-          <button
-            class="infoCard__action secondary"
-            id="btnInfoToggle"
-            title="Show/hide panel"
-          >
-            Hide
-          </button>
-          <button
-            class="infoCard__close secondary"
-            id="btnInfoClose"
-            title="Close"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-      <img class="infoCard__img is-hidden" id="infoCardImg" alt="" />
-      <div class="infoCard__desc" id="infoCardDesc"></div>
-      <div class="infoCard__hint" id="infoCardHint">
-        Tip: use ← / → to navigate the tour.
-      </div>
-    </div>
-
-    <!-- Help Modal -->
-    <div
-      class="modal is-hidden"
-      id="helpModal"
-      role="dialog"
-      aria-modal="true"
-      aria-hidden="true"
-      aria-labelledby="helpModalTitle"
-    >
-      <div class="modal__backdrop" id="helpModalBackdrop"></div>
-
-      <div class="modal__card" role="document">
-        <div class="modal__header">
-          <div class="modal__title" id="helpModalTitle">Help</div>
-          <button
-            class="secondary modal__close"
-            id="btnHelpModalClose"
-            type="button"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div class="modal__body" id="helpModalBody"></div>
-
-        <div class="modal__footer">
-          <button class="secondary" id="btnHelpModalOk" type="button">
-            OK
-          </button>
-        </div>
-      </div>
-    </div>
-
+    <!-- 3D Scene -->
     <a-scene
       keyboard-shortcuts="enterVR: false"
       vr-mode-ui="enabled: false"
-      renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true"
-      background="color: #0b0b0f"
-      fog="type: exponential; density: 0.015; color: #0b0b0f"
+      renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true; shadowMapEnabled: true"
+      background="color: #060a12"
+      fog="type: exponential; density: 0.012; color: #060a12"
       shadow="type: pcfsoft"
     >
       <a-assets>
-        <!-- Model -->
         <a-asset-item
           id="museuGLB"
           src="src/assets/models/vit_vellore_virtual_museum.glb"
         ></a-asset-item>
-
-        <!-- 360 media (optional) -->
-        <img id="panoImg" src="" />
-        <video
-          id="video360"
-          src=""
-          crossorigin="anonymous"
-          playsinline
-          webkit-playsinline
-        ></video>
       </a-assets>
 
-      <!-- Lights -->
-      <a-entity
-        light="type: ambient; intensity: 0.9; color: #ffffff"
-      ></a-entity>
-      <a-entity
-        light="type: directional; intensity: 0.8; castShadow: true"
-        position="4 10 6"
-      ></a-entity>
-      <a-entity
-        light="type: directional; intensity: 0.5; castShadow: true"
-        position="-4 8 -6"
-      ></a-entity>
+      <!-- Layered Two-Floor Architectural Lighting -->
+      <a-entity light="type: ambient; intensity: 0.85; color: #f1f5f9"></a-entity>
+      
+      <!-- Primary Skylight illuminating Atrium & Both Floors -->
+      <a-entity light="type: directional; intensity: 0.8; castShadow: true" position="6 14 8"></a-entity>
+      
+      <!-- Secondary Directional Light for Floor 2 North Galleries -->
+      <a-entity light="type: directional; intensity: 0.6; castShadow: false" position="-6 12 -8"></a-entity>
+      
+      <!-- Staircase and Elevator Accent Light -->
+      <a-entity light="type: point; intensity: 0.7; distance: 15; color: #fbbf24" position="12.5 6.0 10.5"></a-entity>
+      
+      <!-- Central Monument Warm Spotlight -->
+      <a-entity light="type: spot; intensity: 0.75; angle: 45; penumbra: 0.3; distance: 12; color: #fef08a" position="0 6.5 -2.0"></a-entity>
 
-      <!-- Museum model -->
+      <!-- Museum Model -->
       <a-entity
         id="museuModel"
         gltf-model="#museuGLB"
@@ -418,24 +477,34 @@
         scale="1 1 1"
       ></a-entity>
 
-      <!-- Invisible “floor” for click-to-teleport (comfort) -->
+      <!-- Floor 1 Teleport Surface -->
       <a-plane
-        id="teleportFloor"
+        id="teleportFloor1"
         class="teleportable"
         position="0 0 0"
         rotation="-90 0 0"
-        width="220"
-        height="220"
+        width="40"
+        height="38"
         material="color: #000000; opacity: 0.0; transparent: true"
       ></a-plane>
 
-      <!-- RIG: moves during tour and manual movement -->
+      <!-- Floor 2 Teleport Surface -->
+      <a-plane
+        id="teleportFloor2"
+        class="teleportable"
+        position="0 5.0 0"
+        rotation="-90 0 0"
+        width="40"
+        height="38"
+        material="color: #000000; opacity: 0.0; transparent: true"
+      ></a-plane>
+
+      <!-- Camera Rig (moves with player) -->
       <a-entity
         id="rig"
         position="0.00 0.00 15.00"
-        wasd-controls="acceleration: 2; enabled: false; fly: false"
-        bounds-keeper="minX: -60; maxX: 60; minZ: -80; maxZ: 80; y: 0"
-        print-aim
+        wasd-controls="acceleration: 2.2; enabled: false; fly: false"
+        bounds-keeper="minX: -18.5; maxX: 18.5; minZ: -16.5; maxZ: 17.5; y: 0"
       >
         <a-camera
           id="cam"
@@ -444,38 +513,17 @@
           wasd-controls="enabled: false"
         >
           <a-cursor
-            raycaster="objects: .hotspot, .teleportable, .quadroHitbox"
+            raycaster="objects: .hotspot, .teleportable, .quadroHitbox, .interactable"
             fuse="false"
+            material="color: #d4af37; shader: flat"
+            geometry="radiusInner: 0.003; radiusOuter: 0.006"
           ></a-cursor>
 
-          <!-- Flashlight (toggle in menu / key F) -->
           <a-entity
             id="flashlight"
-            light="type: spot; angle: 22; penumbra: 0.2; intensity: 0.0; distance: 18; color: #ffffff"
+            light="type: spot; angle: 24; penumbra: 0.25; intensity: 0.0; distance: 20; color: #ffffff"
             position="0 0 0"
           ></a-entity>
-
-          <!-- Info panel attached to the camera -->
-          <a-entity id="infoPanel" visible="false" position="0 -0.22 -1.85">
-            <a-plane
-              width="2.2"
-              height="0.9"
-              color="#0f0f14"
-              material="opacity: 0.88"
-            ></a-plane>
-
-            <a-entity
-              id="infoText"
-              position="0 0.23 0.01"
-              text="value: ; width: 2.0; color: #FFFFFF; wrapCount: 32; lineHeight: 52; align: center; anchor: center;"
-            ></a-entity>
-
-            <a-entity
-              id="hintText"
-              position="0 -0.28 0.01"
-              text="value: (click a hotspot for details); width: 2.0; color: #B7B7C7; wrapCount: 32; lineHeight: 52; align: center; anchor: center;"
-            ></a-entity>
-          </a-entity>
 
           <a-entity id="narrator"></a-entity>
         </a-camera>
@@ -484,10 +532,10 @@
       <!-- Tour controller -->
       <a-entity
         id="tour"
-        tour-guide="rig: #rig; panel: #infoPanel; text: #infoText; narrator: #narrator; stopsUrl: src/data/tourStops.json; speed: 1.0; autoAdvance: false"
+        tour-guide="rig: #rig; stopsUrl: src/data/tourStops.json; speed: 1.0; autoAdvance: false"
       ></a-entity>
 
-      <!-- Paintings + hitboxes (from PLANE_### in the GLB) -->
+      <!-- Hitbox & Model Node Binding Script -->
       <script>
         const museuEl = document.querySelector("#museuModel");
 
@@ -495,49 +543,30 @@
           return String(n).padStart(3, "0");
         }
 
-        // small fixed offset to avoid z-fighting with the wall
-        const DEFAULT_OFFSET = -0.03;
-
-
-
         museuEl.addEventListener("model-loaded", () => {
           const root = museuEl.getObject3D("mesh");
           if (!root) return;
 
+          // 1. Compatibility anchor planes (PLANE_001 to PLANE_031)
           for (let i = 1; i <= 31; i++) {
             const code = pad3(i);
             const planeName = `PLANE_${code}`;
-
             const marker = root.getObjectByName(planeName);
-            if (!marker) {
-              continue;
-            }
-
-            // Keep baked GLB panel visible
+            if (!marker) continue;
             marker.visible = true;
 
-            // --- marker world transform
             const pos = new THREE.Vector3();
             const quat = new THREE.Quaternion();
             const sca = new THREE.Vector3();
             marker.updateWorldMatrix(true, false);
             marker.matrixWorld.decompose(pos, quat, sca);
 
-            let width = 1.4;
-            let height = 1.1;
-
-            // ===============================
-            // INVISIBLE HITBOX FOR INTERACTION
-            // ===============================
             const hit = document.createElement("a-plane");
-            hit.classList.add("quadroHitbox");
+            hit.classList.add("quadroHitbox", "interactable");
             hit.setAttribute("data-art", code);
-            hit.setAttribute("width", width + 0.2);
-            hit.setAttribute("height", height + 0.2);
-            hit.setAttribute(
-              "material",
-              "transparent:true; opacity:0; side: double",
-            );
+            hit.setAttribute("width", 1.8);
+            hit.setAttribute("height", 1.4);
+            hit.setAttribute("material", "transparent: true; opacity: 0; side: double");
 
             hit.object3D.position.copy(pos);
             hit.object3D.quaternion.copy(quat);
@@ -545,15 +574,87 @@
             hit.addEventListener("click", (e) => {
               e.stopPropagation?.();
               e.preventDefault?.();
-              window.VirtuMuseum?.openPaintingInfoByCode?.(code);
+              window.VirtuMuseum?.openExhibitByCode?.(code);
             });
 
             museuEl.sceneEl.appendChild(hit);
           }
+
+          // 2. Interactive Nodes Binding (INTERACT_*)
+          const interactNodes = [
+            "INTERACT_Welcome", "INTERACT_History_1984", "INTERACT_Founder",
+            "INTERACT_History_UniversityStatus", "INTERACT_CampusPhoto_TechnologyTower",
+            "INTERACT_History_ABET", "INTERACT_History_IoE", "INTERACT_Campus_Model",
+            "INTERACT_Central_Sculpture", "INTERACT_Academics", "INTERACT_FFCS",
+            "INTERACT_CampusPhoto_Library", "INTERACT_CampusPhoto_MainBuilding",
+            "INTERACT_GrandStaircase", "INTERACT_Research", "INTERACT_ResearchCentres",
+            "INTERACT_Research_Table", "INTERACT_VITTBI", "INTERACT_Achievements",
+            "INTERACT_Global", "INTERACT_StudentLife", "INTERACT_Riviera",
+            "INTERACT_graVITas", "INTERACT_StudentChapters", "INTERACT_CampusPhoto_Hostels",
+            "INTERACT_Convocation", "INTERACT_Finale"
+          ];
+
+          interactNodes.forEach((nodeName) => {
+            const obj = root.getObjectByName(nodeName);
+            if (!obj) return;
+            const wPos = new THREE.Vector3();
+            obj.updateWorldMatrix(true, false);
+            obj.getWorldPosition(wPos);
+
+            const hit = document.createElement("a-sphere");
+            hit.classList.add("interactable");
+            hit.setAttribute("radius", "0.9");
+            hit.setAttribute("material", "transparent: true; opacity: 0");
+            hit.object3D.position.copy(wPos);
+
+            hit.addEventListener("click", (e) => {
+              e.stopPropagation?.();
+              e.preventDefault?.();
+              window.VirtuMuseum?.handleNodeInteraction?.(nodeName);
+            });
+
+            museuEl.sceneEl.appendChild(hit);
+          });
+
+          // 3. 3D Illuminated Tour Stop Markers
+          const tourStopCoords = [
+            { order: 1, name: "TOUR_01_Welcome", pos: [0.0, 0.02, 14.5] },
+            { order: 2, name: "TOUR_02_Origins", pos: [-14.0, 0.02, -12.0] },
+            { order: 3, name: "TOUR_03_Founder", pos: [-14.0, 0.02, -9.0] },
+            { order: 4, name: "TOUR_04_Academics", pos: [-14.0, 0.02, -1.0] },
+            { order: 5, name: "TOUR_05_Schools", pos: [14.0, 0.02, -11.0] },
+            { order: 6, name: "TOUR_06_FFCS", pos: [14.0, 0.02, -4.0] },
+            { order: 7, name: "TOUR_07_CampusModel", pos: [0.0, 0.02, 6.5] },
+            { order: 8, name: "TOUR_08_CentralMonument", pos: [0.0, 0.02, 1.5] },
+            { order: 9, name: "TOUR_09_Staircase", pos: [8.5, 0.02, 9.0] },
+            { order: 10, name: "TOUR_10_Research", pos: [-13.0, 5.02, -3.0] },
+            { order: 11, name: "TOUR_11_ResearchTable", pos: [-11.0, 5.02, -6.5] },
+            { order: 12, name: "TOUR_12_Achievements", pos: [8.0, 5.02, -12.0] },
+            { order: 13, name: "TOUR_13_Global", pos: [0.0, 5.02, 6.5] },
+            { order: 14, name: "TOUR_14_StudentLife", pos: [13.0, 5.02, -6.0] },
+            { order: 15, name: "TOUR_15_TechnicalCulture", pos: [13.0, 5.02, 2.0] },
+            { order: 16, name: "TOUR_16_Finale", pos: [0.0, 5.02, 1.0] }
+          ];
+
+          tourStopCoords.forEach((ts) => {
+            const marker = document.createElement("a-ring");
+            marker.classList.add("interactable");
+            marker.setAttribute("radius-inner", "0.6");
+            marker.setAttribute("radius-outer", "0.8");
+            marker.setAttribute("rotation", "-90 0 0");
+            marker.setAttribute("position", `${ts.pos[0]} ${ts.pos[1]} ${ts.pos[2]}`);
+            marker.setAttribute("material", "color: #d4af37; emissive: #d4af37; emissiveIntensity: 0.6; side: double; transparent: true; opacity: 0.85");
+
+            marker.addEventListener("click", () => {
+              window.VirtuMuseum?.jumpToTourStop?.(ts.order - 1);
+            });
+
+            museuEl.sceneEl.appendChild(marker);
+          });
         });
       </script>
 
-      <!-- O teu JS -->
+      <!-- App JS Module -->
       <script
         type="module"
         src="src/js/app.js"

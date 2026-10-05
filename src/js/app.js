@@ -1,3 +1,5 @@
+import { MUSEUM_EXHIBITS, INTERACTION_REGISTRY } from "../data/museumContent.js";
+
 const $ = (sel) => document.querySelector(sel);
 
 const AFRAME = window.AFRAME;
@@ -543,10 +545,10 @@ async function enrichStopsWithPaintings(stops) {
     if (!p) continue;
 
     const formatted = formatPaintingDesc(p);
-    if (formatted.title) stop.title = formatted.title;
-    if (formatted.desc) stop.desc = formatted.desc;
+    if (!stop.title && formatted.title) stop.title = formatted.title;
+    if (!stop.desc && formatted.desc) stop.desc = formatted.desc;
     stop.paintingCode = code;
-    stop.imageUrl = imageUrlForPainting(p);
+    if (!stop.imageUrl) stop.imageUrl = imageUrlForPainting(p);
   }
 }
 
@@ -629,12 +631,41 @@ function getBoundsForRig(rigEl) {
   };
 }
 
+function getTwoFloorPosition(pos) {
+  let x = clamp(pos.x, -18.2, 18.2);
+  let z = clamp(pos.z, -16.2, 16.2);
+  let y = pos.y || 0;
+
+  // 1. Staircase traversal zone: x in [10.5, 14.5], z in [6.8, 14.8]
+  const inStairs = x >= 10.5 && x <= 14.5 && z >= 6.8 && z <= 14.8;
+  if (inStairs) {
+    const t = clamp((z - 6.8) / (14.5 - 6.8), 0, 1);
+    y = t * 5.0;
+  } else if (y >= 2.5) {
+    // Floor 2 Mezzanine level
+    y = 5.0;
+    // Central atrium cutout protection on Floor 2: x in [-7.2, 7.2], z in [-6.2, 5.2]
+    if (x > -7.2 && x < 7.2 && z > -6.2 && z < 5.2) {
+      const distLeft = Math.abs(x - (-7.2));
+      const distRight = Math.abs(7.2 - x);
+      const distTop = Math.abs(5.2 - z);
+      const distBottom = Math.abs(z - (-6.2));
+      const minDist = Math.min(distLeft, distRight, distTop, distBottom);
+      if (minDist === distLeft) x = -7.2;
+      else if (minDist === distRight) x = 7.2;
+      else if (minDist === distTop) z = 5.2;
+      else z = -6.2;
+    }
+  } else {
+    // Floor 1 ground level
+    y = 0.0;
+  }
+
+  return { x, y, z };
+}
+
 function clampPosToBounds(pos, bounds) {
-  return {
-    x: clamp(pos.x, bounds.minX, bounds.maxX),
-    y: bounds.y,
-    z: clamp(pos.z, bounds.minZ, bounds.maxZ),
-  };
+  return getTwoFloorPosition(pos);
 }
 
 const WALL_BOX_THICKNESS = 0.12;
@@ -642,10 +673,10 @@ const WALL_BOX_THICKNESS = 0.12;
 const PLAYER_RADIUS = 0.28;
 
 const DEFAULT_GALLERY_BOUNDS = {
-  minX: -22.0,
-  maxX: 14.0,
-  minZ: -13.0,
-  maxZ: 14.0,
+  minX: -18.2,
+  maxX: 18.2,
+  minZ: -16.2,
+  maxZ: 16.2,
   y: 0,
 };
 
@@ -784,53 +815,7 @@ function computeBoundsFromStops(stops, pad = 2.25) {
 }
 
 function ensureVisualWalls(bounds) {
-  const scene = document.querySelector("a-scene");
-  if (!scene) return;
-
-  const ensure = (id) => {
-    let el = document.getElementById(id);
-    if (el) return el;
-    el = document.createElement("a-box");
-    el.setAttribute("id", id);
-    el.setAttribute(
-      "material",
-      "color: rgb(255, 255, 255); opacity: 0.18; transparent: true; side: double",
-    );
-    el.setAttribute("shadow", "cast: false; receive: false");
-    scene.appendChild(el);
-    return el;
-  };
-
-  const wallH = 3;
-  const thick = WALL_BOX_THICKNESS;
-  const cx = (bounds.minX + bounds.maxX) / 2;
-  const cz = (bounds.minZ + bounds.maxZ) / 2;
-  const w = Math.max(0.1, bounds.maxX - bounds.minX);
-  const d = Math.max(0.1, bounds.maxZ - bounds.minZ);
-
-  const n = ensure("wallNorth");
-  n.setAttribute("width", w);
-  n.setAttribute("height", wallH);
-  n.setAttribute("depth", thick);
-  n.setAttribute("position", `${cx} ${wallH / 2} ${bounds.maxZ}`);
-
-  const s = ensure("wallSouth");
-  s.setAttribute("width", w);
-  s.setAttribute("height", wallH);
-  s.setAttribute("depth", thick);
-  s.setAttribute("position", `${cx} ${wallH / 2} ${bounds.minZ}`);
-
-  const e = ensure("wallEast");
-  e.setAttribute("width", thick);
-  e.setAttribute("height", wallH);
-  e.setAttribute("depth", d);
-  e.setAttribute("position", `${bounds.maxX} ${wallH / 2} ${cz}`);
-
-  const o = ensure("wallWest");
-  o.setAttribute("width", thick);
-  o.setAttribute("height", wallH);
-  o.setAttribute("depth", d);
-  o.setAttribute("position", `${bounds.minX} ${wallH / 2} ${cz}`);
+  // Built into 3D GLB model; no phantom white boxes needed.
 }
 
 function collisionBoundsFromWallCenters(wallCenters) {
@@ -1780,61 +1765,39 @@ AFRAME.registerComponent("teleport-surface", {
 
 AFRAME.registerComponent("bounds-keeper", {
   schema: {
-    minX: { type: "number", default: -60 },
-    maxX: { type: "number", default: 60 },
-    minZ: { type: "number", default: -80 },
-    maxZ: { type: "number", default: 80 },
+    minX: { type: "number", default: -18.5 },
+    maxX: { type: "number", default: 18.5 },
+    minZ: { type: "number", default: -16.5 },
+    maxZ: { type: "number", default: 16.5 },
     y: { type: "number", default: 0 },
   },
   init: function () {
     this.lastSafe = null;
     this.lastWarn = 0;
+    this.lastFloorSync = 0;
 
     const pObj = this.el.object3D?.position;
     if (!pObj) return;
-    const b = getBoundsForRig(this.el);
-    const inside =
-      pObj.x >= b.minX &&
-      pObj.x <= b.maxX &&
-      pObj.z >= b.minZ &&
-      pObj.z <= b.maxZ;
-    if (inside) this.lastSafe = { x: pObj.x, y: b.y, z: pObj.z };
+    this.lastSafe = { x: pObj.x, y: pObj.y, z: pObj.z };
   },
   tick: function () {
     const el = this.el;
     const pObj = el.object3D?.position;
     if (!pObj) return;
 
-    const b = getBoundsForRig(el);
+    // 1. Two-floor position resolver
+    const clamped = getTwoFloorPosition({ x: pObj.x, y: pObj.y, z: pObj.z });
+    pObj.x = clamped.x;
+    pObj.y = clamped.y;
+    pObj.z = clamped.z;
 
-    if (typeof b.y === "number" && Math.abs(pObj.y - b.y) > 0.01) {
-      pObj.y = b.y;
-    }
+    this.lastSafe = clamped;
 
-    const inside =
-      pObj.x >= b.minX &&
-      pObj.x <= b.maxX &&
-      pObj.z >= b.minZ &&
-      pObj.z <= b.maxZ;
-
-    if (inside) {
-      this.lastSafe = { x: pObj.x, y: b.y, z: pObj.z };
-      return;
-    }
-
-    debugWalls("boundsKeeper_outside", el, {
-      nextPos: { x: pObj.x, y: pObj.y, z: pObj.z },
-      clampedPos: this.lastSafe,
-    });
-
+    // 2. Real-time Floor and Section HUD indicator
     const now = performance.now();
-    const clamped = clampPosToBounds({ x: pObj.x, y: b.y, z: pObj.z }, b);
-    pObj.set(clamped.x, clamped.y, clamped.z);
-    el.setAttribute("position", vec3ToString(clamped));
-
-    if (now - this.lastWarn > 1500) {
-      this.lastWarn = now;
-      showToast("You're back inside the museum (to avoid the void).");
+    if (now - this.lastFloorSync > 250) {
+      this.lastFloorSync = now;
+      updateHudFloorAndSection(clamped);
     }
   },
 });
@@ -2001,11 +1964,17 @@ function updateTourNav(active, idx = 0, total = 0) {
   if (experienceMode !== "tour") active = false;
   $("#btnTourPrev")?.toggleAttribute("disabled", !active || idx <= 0);
   $("#btnTourNext")?.toggleAttribute("disabled", !active || idx >= total - 1);
+  $("#btnTourPrevBar")?.toggleAttribute("disabled", !active || idx <= 0);
+  $("#btnTourNextBar")?.toggleAttribute("disabled", !active || idx >= total - 1);
   $("#btnStop")?.classList.toggle("is-hidden", !active);
   $("#btnTourPrev")?.classList.toggle("is-hidden", !active);
   $("#btnTourNext")?.classList.toggle("is-hidden", !active);
   $("#tourNav")?.classList.toggle("is-hidden", !active);
   $("#tourNav")?.setAttribute("aria-hidden", String(!active));
+
+  const tourC = $("#tour")?.components?.["tour-guide"];
+  const stop = tourC?.stops?.[idx];
+  updateTourProgressBar(idx, total || tourC?.stops?.length || 16, stop?.title);
 }
 
 function showInfoCard(title, desc, hint) {
@@ -2188,6 +2157,108 @@ function setupUI() {
   $("#btnHUD")?.addEventListener("click", () =>
     setMinimalHUD(!$("#uiRoot")?.classList.contains("is-hud-off")),
   );
+
+  // Map Buttons
+  $("#btnMap")?.addEventListener("click", () => setMapModalOpen(true));
+  $("#btnTourMap")?.addEventListener("click", () => setMapModalOpen(true));
+  $("#btnMapModalClose")?.addEventListener("click", () => setMapModalOpen(false));
+  $("#mapModalBackdrop")?.addEventListener("click", () => setMapModalOpen(false));
+  $("#btnMapTabF1")?.addEventListener("click", () => setMapActiveFloorTab(1));
+  $("#btnMapTabF2")?.addEventListener("click", () => setMapActiveFloorTab(2));
+
+  // Map Zone Fast-Travel clicks
+  $("#mapZoneLobby")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "0.000 0.000 12.000");
+  });
+  $("#mapZoneHistory")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "-14.000 0.000 -6.000");
+  });
+  $("#mapZoneAcademics")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "14.000 0.000 -6.000");
+  });
+  $("#mapZoneAtrium")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "0.000 0.000 0.000");
+  });
+  $("#mapZoneStairsF1")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "12.500 0.000 8.000");
+  });
+  $("#mapZoneElevatorF1")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    switchFloor(2);
+  });
+  $("#mapZoneResearch")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "-13.000 5.000 -4.000");
+  });
+  $("#mapZoneAchievements")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "8.000 5.000 -12.000");
+  });
+  $("#mapZoneGlobal")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "0.000 5.000 6.000");
+  });
+  $("#mapZoneLife")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "13.000 5.000 -4.000");
+  });
+  $("#mapZoneStairsF2")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "12.500 5.000 13.500");
+  });
+  $("#mapZoneElevatorF2")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    switchFloor(1);
+  });
+
+  // Floor Transition Buttons
+  $("#btnElevatorQuick")?.addEventListener("click", () => switchFloor());
+  $("#hudFloorIndicator")?.addEventListener("click", () => switchFloor());
+  $("#btnMenuFloor1")?.addEventListener("click", () => {
+    setMenuOpen(false);
+    switchFloor(1);
+  });
+  $("#btnMenuFloor2")?.addEventListener("click", () => {
+    setMenuOpen(false);
+    switchFloor(2);
+  });
+
+  // Exhibit Drawer Controls
+  $("#btnExhibitClose")?.addEventListener("click", () => closeExhibitDrawer());
+  $("#btnExhibitPrev")?.addEventListener("click", () => {
+    if (currentExhibitIdx > 0) {
+      openExhibit(MUSEUM_EXHIBITS[currentExhibitIdx - 1]);
+    }
+  });
+  $("#btnExhibitNext")?.addEventListener("click", () => {
+    if (currentExhibitIdx < MUSEUM_EXHIBITS.length - 1) {
+      openExhibit(MUSEUM_EXHIBITS[currentExhibitIdx + 1]);
+    }
+  });
+
+  // Campus Model and Research Modals
+  $("#btnCampusModalClose")?.addEventListener("click", () => setCampusModalOpen(false));
+  $("#campusModalBackdrop")?.addEventListener("click", () => setCampusModalOpen(false));
+  $("#btnResearchModalClose")?.addEventListener("click", () => setResearchModalOpen(false));
+  $("#researchModalBackdrop")?.addEventListener("click", () => setResearchModalOpen(false));
+
+  // Tour Header Bar Controls
+  $("#btnTourBar")?.addEventListener("click", () => enterExperience("tour"));
+  $("#btnTourPrevBar")?.addEventListener("click", () => {
+    $("#tour")?.components?.["tour-guide"]?.prev?.();
+  });
+  $("#btnTourNextBar")?.addEventListener("click", () => {
+    $("#tour")?.components?.["tour-guide"]?.next?.();
+  });
+  $("#btnTourEndBar")?.addEventListener("click", () => {
+    $("#tour")?.components?.["tour-guide"]?.stop?.();
+    enterExperience("explore");
+  });
 
   $("#btnFullscreen")?.addEventListener("click", toggleFullscreen);
   $("#btnFullscreenWelcome")?.addEventListener("click", toggleFullscreen);
@@ -2566,13 +2637,8 @@ function setupUI() {
 
   window.addEventListener("tour:stopsLoaded", (e) => {
     const stops = e.detail?.stops || [];
-
     renderStopsList(stops);
-
-    try {
-      const computed = computeBoundsFromStops(stops);
-      if (computed) applyFourWalls(computed, { visual: true });
-    } catch (err) {}
+    updateTourProgressBar(0, stops.length, stops[0]?.title);
   });
 
   window.addEventListener(
@@ -2676,10 +2742,22 @@ function setupUI() {
         e.stopPropagation();
       }
 
-      if (e.key === "m" || e.key === "M") toggleMenu();
+      if (e.key === "m" || e.key === "M") {
+        const isMapOpen = !$("#mapModal")?.classList.contains("is-hidden");
+        setMapModalOpen(!isMapOpen);
+      }
+      if (e.key === "t" || e.key === "T") {
+        if (experienceMode !== "tour") enterExperience("tour");
+      }
       if (e.key === "h" || e.key === "H")
         setMinimalHUD(!$("#uiRoot")?.classList.contains("is-hud-off"));
-      if (e.key === "Escape") tourC.stop();
+      if (e.key === "Escape") {
+        closeExhibitDrawer();
+        setMapModalOpen(false);
+        setCampusModalOpen(false);
+        setResearchModalOpen(false);
+        if (tourC.running) tourC.stop();
+      }
 
       if (e.key === "Enter") {
         e.preventDefault();
@@ -2698,7 +2776,32 @@ function setupUI() {
       }
 
       if (e.key === "q" || e.key === "Q") tourC.prev();
-      if (e.key === "e" || e.key === "E") tourC.next();
+      if (e.key === "e" || e.key === "E") {
+        // In free explore or tour, interact with closest exhibit or advance tour
+        const drawerOpen = $("#exhibitDrawer")?.classList.contains("is-open");
+        if (drawerOpen) {
+          closeExhibitDrawer();
+        } else if (tourC.running) {
+          tourC.next();
+        } else {
+          // Open exhibit based on current section
+          const rig = $("#rig");
+          const pos = rig?.object3D?.position;
+          if (pos) {
+            if (pos.y >= 2.5) {
+              if (pos.x <= -6) openExhibitById("research-ecosystem");
+              else if (pos.x >= 6) openExhibitById("student-life");
+              else if (pos.z < -6) openExhibitById("wall-achievements");
+              else openExhibitById("global-vit");
+            } else {
+              if (pos.x <= -6) openExhibitById("history-1984");
+              else if (pos.x >= 6) openExhibitById("acad-schools");
+              else if (pos.z < 3) openExhibitById("central-monument");
+              else openExhibitById("exhibit-welcome");
+            }
+          }
+        }
+      }
 
       if (e.key === "c" || e.key === "C") takePhoto();
       if (e.key === "f" || e.key === "F") toggleFlashlight();
@@ -2888,6 +2991,336 @@ function setHelpModalOpen(open, text = "") {
     } catch {}
   }
 }
+
+// =========================================================================
+// TWO-FLOOR VIT VELLORE VIRTUAL MUSEUM CONTROLLERS
+// =========================================================================
+
+let currentExhibitIdx = 0;
+let currentActiveFloor = 1;
+
+function updateHudFloorAndSection(pos) {
+  const y = Number(pos.y || 0);
+  const z = Number(pos.z || 0);
+  const x = Number(pos.x || 0);
+
+  const isF2 = y >= 2.5;
+  const floorNumEl = $("#hudFloorNum");
+  const floorNameEl = $("#hudFloorName");
+
+  if (!floorNumEl || !floorNameEl) return;
+
+  if (isF2) {
+    currentActiveFloor = 2;
+    floorNumEl.textContent = "FLOOR 2";
+    if (x <= -6.0) floorNameEl.textContent = "RESEARCH & INNOVATION";
+    else if (x >= 6.0) floorNameEl.textContent = "STUDENT LIFE & CLUBS";
+    else if (z < -8.0) floorNameEl.textContent = "WALL OF ACHIEVEMENTS";
+    else if (z > 4.0) floorNameEl.textContent = "GLOBAL VIT & FINALE";
+    else floorNameEl.textContent = "ATRIUM MEZZANINE";
+  } else {
+    currentActiveFloor = 1;
+    floorNumEl.textContent = "FLOOR 1";
+    if (z > 7.0 && x >= 9.5) floorNameEl.textContent = "GRAND STAIRCASE";
+    else if (z > 7.0) floorNameEl.textContent = "WELCOME LOBBY";
+    else if (x <= -6.0) floorNameEl.textContent = "ORIGINS & EVOLUTION";
+    else if (x >= 6.0) floorNameEl.textContent = "ACADEMICS & SCHOOLS";
+    else floorNameEl.textContent = "CENTRAL MONUMENT & MODEL";
+  }
+
+  // Sync map beacon position if map is open
+  syncMapPlayerBeacon(x, z, currentActiveFloor);
+}
+
+function updateTourProgressBar(idx, total, title) {
+  const bar = $("#tourProgress");
+  const step = $("#tourProgressStep");
+  const titleEl = $("#tourProgressTitle");
+  if (!bar || !step || !titleEl) return;
+
+  if (experienceMode !== "tour") {
+    bar.classList.add("is-hidden");
+    return;
+  }
+
+  bar.classList.remove("is-hidden");
+  step.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+  titleEl.textContent = title || "Guided Tour Stop";
+}
+
+function openExhibitById(id) {
+  const exhibit = MUSEUM_EXHIBITS.find((e) => e.id === id);
+  if (!exhibit) {
+    showToast(`Exhibit not found: ${id}`);
+    return;
+  }
+  openExhibit(exhibit);
+}
+
+function openExhibitByCode(code) {
+  const c = String(code).padStart(3, "0");
+  const exhibit = MUSEUM_EXHIBITS.find((e) => e.code === c);
+  if (!exhibit) {
+    // Fallback to legacy painting by code
+    openPaintingInfoByCode(c);
+    return;
+  }
+  openExhibit(exhibit);
+}
+
+function openExhibit(exhibit) {
+  currentExhibitIdx = MUSEUM_EXHIBITS.findIndex((e) => e.id === exhibit.id);
+  if (currentExhibitIdx === -1) currentExhibitIdx = 0;
+
+  const drawer = $("#exhibitDrawer");
+  if (!drawer) return;
+
+  // Badges
+  $("#exhibitFloorBadge").textContent = `Floor ${exhibit.floor}`;
+  $("#exhibitCategoryBadge").textContent = exhibit.section || "VIT Exhibit";
+  $("#exhibitYearBadge").textContent = exhibit.year || "Verified";
+
+  // Content
+  $("#exhibitTitle").textContent = exhibit.title || "—";
+  $("#exhibitSubtitle").textContent = exhibit.subtitle || "";
+  $("#exhibitDesc").textContent = exhibit.description || exhibit.shortDescription || "";
+
+  // Facts
+  const factsList = $("#exhibitFactsList");
+  const factsBox = $("#exhibitFactsBox");
+  if (factsList && factsBox) {
+    factsList.innerHTML = "";
+    if (Array.isArray(exhibit.facts) && exhibit.facts.length > 0) {
+      exhibit.facts.forEach((f) => {
+        const li = document.createElement("li");
+        li.textContent = f;
+        factsList.appendChild(li);
+      });
+      factsBox.classList.remove("is-hidden");
+    } else {
+      factsBox.classList.add("is-hidden");
+    }
+  }
+
+  // Provenance Source Link
+  const srcBox = $("#exhibitProvenanceBox");
+  const srcLink = $("#exhibitSourceLink");
+  if (srcBox && srcLink) {
+    if (exhibit.sourceUrl) {
+      srcLink.href = exhibit.sourceUrl;
+      srcLink.textContent = `${exhibit.sourceTitle || "Official Source"} ↗`;
+      srcBox.classList.remove("is-hidden");
+    } else {
+      srcBox.classList.add("is-hidden");
+    }
+  }
+
+  // Image with graceful fallback
+  const img = $("#exhibitImg");
+  const fallback = $("#exhibitImgFallback");
+  if (img) {
+    img.onerror = () => {
+      img.classList.add("is-hidden");
+      fallback?.classList.remove("is-hidden");
+    };
+    img.onload = () => {
+      img.classList.remove("is-hidden");
+      fallback?.classList.add("is-hidden");
+    };
+    img.src = exhibit.image || "src/assets/images/vit/vit_logo_official.png";
+    img.alt = exhibit.imageAlt || exhibit.title || "Exhibit Image";
+  }
+
+  drawer.classList.add("is-open");
+  drawer.setAttribute("aria-hidden", "false");
+
+  // Voice narration if enabled
+  const ttsOn = localStorage.getItem("virtumuseum.tts") === "1";
+  if (ttsOn) {
+    speak(`${exhibit.title}. ${exhibit.shortDescription || exhibit.description}`);
+  }
+}
+
+function closeExhibitDrawer() {
+  const drawer = $("#exhibitDrawer");
+  if (!drawer) return;
+  drawer.classList.remove("is-open");
+  drawer.setAttribute("aria-hidden", "true");
+}
+
+function handleNodeInteraction(nodeName) {
+  const item = INTERACTION_REGISTRY[nodeName];
+  if (!item) {
+    dlog("No registry entry for node", nodeName);
+    return;
+  }
+
+  if (item.type === "exhibit") {
+    openExhibitById(item.exhibitId);
+  } else if (item.type === "campus-model") {
+    setCampusModalOpen(true);
+  } else if (item.type === "research-table") {
+    setResearchModalOpen(true);
+  } else if (item.type === "global-map") {
+    openExhibitById("global-vit");
+  } else if (item.type === "monument") {
+    openExhibitById("central-monument");
+  } else if (item.type === "floor-transition") {
+    switchFloor();
+  } else if (item.type === "finale") {
+    openExhibitById("vit-future");
+  }
+}
+
+function switchFloor(targetFloor) {
+  const rig = $("#rig");
+  if (!rig) return;
+  const p = rig.object3D.position;
+  const currFloor = p.y >= 2.5 ? 2 : 1;
+  const nextFloor = targetFloor ? targetFloor : currFloor === 1 ? 2 : 1;
+
+  if (nextFloor === 2) {
+    rig.object3D.position.set(12.5, 5.0, 14.0);
+    rig.setAttribute("position", "12.500 5.000 14.000");
+    showToast("Floor 2: Innovation & Impact");
+  } else {
+    rig.object3D.position.set(12.5, 0.0, 7.5);
+    rig.setAttribute("position", "12.500 0.000 7.500");
+    showToast("Floor 1: The VIT Journey");
+  }
+}
+
+// Interactive Map Controller
+function renderMapTourPins() {
+  const pinsF1 = $("#mapTourPinsF1");
+  const pinsF2 = $("#mapTourPinsF2");
+  if (!pinsF1 || !pinsF2) return;
+
+  const tourC = $("#tour")?.components?.["tour-guide"];
+  const stops = tourC?.stops || [];
+
+  pinsF1.innerHTML = "";
+  pinsF2.innerHTML = "";
+
+  stops.forEach((s, idx) => {
+    const parsed = parseVec3String(s.pos || "");
+    if (!parsed) return;
+    const floor = s.floor || (parsed.y >= 2.5 ? 2 : 1);
+    const parent = floor === 2 ? pinsF2 : pinsF1;
+
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.style.cursor = "pointer";
+
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", String(parsed.x));
+    circle.setAttribute("cy", String(parsed.z));
+    circle.setAttribute("r", "1.0");
+    circle.setAttribute("fill", "#d4af37");
+    circle.setAttribute("stroke", "#ffffff");
+    circle.setAttribute("stroke-width", "0.3");
+
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", String(parsed.x));
+    text.setAttribute("y", String(parsed.z + 0.35));
+    text.setAttribute("fill", "#070c18");
+    text.setAttribute("font-size", "0.85");
+    text.setAttribute("font-weight", "700");
+    text.setAttribute("text-anchor", "middle");
+    text.textContent = String(idx + 1);
+
+    g.appendChild(circle);
+    g.appendChild(text);
+
+    g.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setMapModalOpen(false);
+      window.VirtuMuseum?.jumpToTourStop?.(idx);
+    });
+
+    parent.appendChild(g);
+  });
+}
+
+function setMapModalOpen(open) {
+  const modal = $("#mapModal");
+  if (!modal) return;
+  if (open) {
+    modal.classList.remove("is-hidden");
+    modal.setAttribute("aria-hidden", "false");
+    setMapActiveFloorTab(currentActiveFloor);
+    renderMapTourPins();
+  } else {
+    modal.classList.add("is-hidden");
+    modal.setAttribute("aria-hidden", "true");
+  }
+  syncMovementLock();
+}
+
+function setMapActiveFloorTab(floor) {
+  const tabF1 = $("#btnMapTabF1");
+  const tabF2 = $("#btnMapTabF2");
+  const svgF1 = $("#mapSvgFloor1");
+  const svgF2 = $("#mapSvgFloor2");
+
+  if (floor === 2) {
+    tabF1?.classList.remove("is-active");
+    tabF2?.classList.add("is-active");
+    svgF1?.classList.add("is-hidden");
+    svgF2?.classList.remove("is-hidden");
+  } else {
+    tabF1?.classList.add("is-active");
+    tabF2?.classList.remove("is-active");
+    svgF1?.classList.remove("is-hidden");
+    svgF2?.classList.add("is-hidden");
+  }
+}
+
+function syncMapPlayerBeacon(x, z, floor) {
+  const beaconF1 = $("#playerBeaconF1");
+  const beaconF2 = $("#playerBeaconF2");
+  if (beaconF1) {
+    beaconF1.setAttribute("cx", String(x));
+    beaconF1.setAttribute("cy", String(z));
+    beaconF1.style.display = floor === 1 ? "block" : "none";
+  }
+  if (beaconF2) {
+    beaconF2.setAttribute("cx", String(x));
+    beaconF2.setAttribute("cy", String(z));
+    beaconF2.style.display = floor === 2 ? "block" : "none";
+  }
+}
+
+// Campus Landmarks Modal
+function setCampusModalOpen(open) {
+  const modal = $("#campusModal");
+  if (!modal) return;
+  modal.classList.toggle("is-hidden", !open);
+  syncMovementLock();
+}
+
+// Strategic Research Modal
+function setResearchModalOpen(open) {
+  const modal = $("#researchModal");
+  if (!modal) return;
+  modal.classList.toggle("is-hidden", !open);
+  syncMovementLock();
+}
+
+// Global hook exposures
+window.VirtuMuseum = window.VirtuMuseum || {};
+window.VirtuMuseum.openExhibitById = openExhibitById;
+window.VirtuMuseum.openExhibitByCode = openExhibitByCode;
+window.VirtuMuseum.handleNodeInteraction = handleNodeInteraction;
+window.VirtuMuseum.switchFloor = switchFloor;
+window.VirtuMuseum.jumpToTourStop = function (stopIdx) {
+  const tour = $("#tour")?.components?.["tour-guide"];
+  if (tour) {
+    if (experienceMode !== "tour") {
+      enterExperience("tour");
+    }
+    tour.teleportTo(stopIdx);
+  }
+};
 
 function initApp() {
   setupUI();
