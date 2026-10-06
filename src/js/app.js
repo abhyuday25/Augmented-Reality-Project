@@ -217,15 +217,19 @@ function applyManualMove(dtMs, x, y) {
 function startManualMovementLoop() {
   let last = performance.now();
   const frame = (now) => {
-    const dt = now - last;
-    last = now;
+    try {
+      const dt = now - last;
+      last = now;
 
-    const k = getKeyboardMoveVector();
+      const k = getKeyboardMoveVector();
 
-    const jx = joystickState.active ? joystickState.x : 0;
-    const jy = joystickState.active ? joystickState.y : 0;
+      const jx = joystickState.active ? joystickState.x : 0;
+      const jy = joystickState.active ? joystickState.y : 0;
 
-    applyManualMove(dt, k.x + jx, k.y + jy);
+      applyManualMove(dt, k.x + jx, k.y + jy);
+    } catch (err) {
+      console.error("Manual move loop error:", err);
+    }
 
     requestAnimationFrame(frame);
   };
@@ -717,7 +721,9 @@ function notifyWallHit() {
   const now = performance.now();
   if (now - lastWallHitAt < 900) return;
   lastWallHitAt = now;
-  showToast("Wall.");
+  try {
+    showToast("Wall.");
+  } catch {}
 }
 
 function isDebugWallsEnabled() {
@@ -1407,6 +1413,7 @@ AFRAME.registerComponent("tour-guide", {
     this.data.panel?.setAttribute("visible", false);
     this.data.narrator?.removeAttribute("sound");
     hideInfoCard();
+    hideTourStopPopup();
     updateTourNav(false);
   },
 
@@ -1528,6 +1535,7 @@ AFRAME.registerComponent("tour-guide", {
       stop.desc,
       "Use ← / → to navigate. (Esc ends the tour)",
     );
+    showTourStopPopup(stop, this.idx, this.stops.length);
     if (this.tts) speak(`${stop.title}. ${stop.desc}`);
   },
 
@@ -1553,6 +1561,7 @@ AFRAME.registerComponent("tour-guide", {
       ? `Heading to: ${stop.title}`
       : "Changing stops…";
     setInfoCardTransition(true, destTitle);
+    hideTourStopPopup();
     $("#btnTourPrev")?.setAttribute("disabled", "true");
     $("#btnTourNext")?.setAttribute("disabled", "true");
 
@@ -1986,9 +1995,12 @@ function showInfoCard(title, desc, hint) {
   closeBtn?.classList.toggle("is-hidden", hideClose);
   closeBtn?.setAttribute("aria-hidden", String(hideClose));
 
-  $("#infoCardTitle").textContent = title || "—";
-  $("#infoCardDesc").textContent = desc || "";
-  $("#infoCardHint").textContent = hint || "";
+  const tEl = $("#infoCardTitle");
+  if (tEl) tEl.textContent = title || "—";
+  const dEl = $("#infoCardDesc");
+  if (dEl) dEl.textContent = desc || "";
+  const hEl = $("#infoCardHint");
+  if (hEl) hEl.textContent = hint || "";
   card.classList.remove("is-hidden");
 }
 
@@ -2025,14 +2037,26 @@ function hideInfoCard() {
   setInfoCardImageHidden(false);
 }
 
+let appToastTimer = null;
 function showToast(text) {
-  if (!$("#infoCard")?.classList.contains("is-hidden")) {
-    $("#infoCardHint").textContent = text;
-    return;
+  if (!text) return;
+  try {
+    let toastEl = $("#appToast");
+    if (!toastEl) {
+      toastEl = document.createElement("div");
+      toastEl.id = "appToast";
+      toastEl.className = "toast";
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = text;
+    toastEl.style.display = "block";
+    if (appToastTimer) clearTimeout(appToastTimer);
+    appToastTimer = setTimeout(() => {
+      if (toastEl) toastEl.style.display = "none";
+    }, 1800);
+  } catch (err) {
+    console.warn("showToast failed:", err);
   }
-  setInfoCardImage("", "");
-  showInfoCard("Info", text, experienceMode === "tour" ? "" : "");
-  setTimeout(() => hideInfoCard(), 1400);
 }
 
 function setMode(mode) {
@@ -2254,6 +2278,25 @@ function setupUI() {
   });
   $("#btnTourNextBar")?.addEventListener("click", () => {
     $("#tour")?.components?.["tour-guide"]?.next?.();
+  });
+  $("#btnTourInfoBar")?.addEventListener("click", () => {
+    toggleTourStopPopup();
+  });
+  $("#btnTourStopClose")?.addEventListener("click", () => {
+    hideTourStopPopup();
+  });
+  $("#btnTourStopPrev")?.addEventListener("click", () => {
+    $("#tour")?.components?.["tour-guide"]?.prev?.();
+  });
+  $("#btnTourStopNext")?.addEventListener("click", () => {
+    $("#tour")?.components?.["tour-guide"]?.next?.();
+  });
+  $("#btnTourStopExhibit")?.addEventListener("click", () => {
+    const tourC = $("#tour")?.components?.["tour-guide"];
+    const currentStop = tourC?.stops?.[tourC?.idx || 0];
+    if (currentStop?.exhibitIds?.[0]) {
+      openExhibitById(currentStop.exhibitIds[0]);
+    }
   });
   $("#btnTourEndBar")?.addEventListener("click", () => {
     $("#tour")?.components?.["tour-guide"]?.stop?.();
@@ -2689,7 +2732,8 @@ function setupUI() {
       }
 
       if (isMoveKey) {
-        movementKeysDown.add(keyLower || key);
+        movementKeysDown.add(keyLower);
+        movementKeysDown.add(key);
       }
 
       if (infoOpen) {
@@ -2752,6 +2796,11 @@ function setupUI() {
       if (e.key === "h" || e.key === "H")
         setMinimalHUD(!$("#uiRoot")?.classList.contains("is-hud-off"));
       if (e.key === "Escape") {
+        const popup = $("#tourStopPopup");
+        if (popup && !popup.classList.contains("is-hidden")) {
+          hideTourStopPopup();
+          return;
+        }
         closeExhibitDrawer();
         setMapModalOpen(false);
         setCampusModalOpen(false);
@@ -2824,12 +2873,24 @@ function setupUI() {
         key === "ArrowLeft" ||
         key === "ArrowRight";
       if (isMoveKey) {
-        movementKeysDown.delete(keyLower || key);
+        movementKeysDown.delete(keyLower);
+        movementKeysDown.delete(key);
         if (movementKeysDown.size === 0) resetWASDVelocity();
       }
     },
     { capture: true },
   );
+
+  window.addEventListener("blur", () => {
+    movementKeysDown.clear();
+    resetWASDVelocity();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      movementKeysDown.clear();
+      resetWASDVelocity();
+    }
+  });
 
   $("#btnTourNext")?.addEventListener("click", () =>
     $("#tour")?.components?.["tour-guide"]?.next?.(),
@@ -3148,6 +3209,114 @@ function closeExhibitDrawer() {
   drawer.setAttribute("aria-hidden", "true");
 }
 
+let currentTourStopData = null;
+
+function showTourStopPopup(stop, stopIdx, totalStops) {
+  const popup = $("#tourStopPopup");
+  if (!popup || !stop) return;
+  currentTourStopData = { stop, stopIdx, totalStops };
+
+  // Find associated exhibit for rich details & high-res images
+  let exhibit = null;
+  if (stop.exhibitIds && stop.exhibitIds.length > 0) {
+    exhibit = MUSEUM_EXHIBITS.find((e) => e.id === stop.exhibitIds[0]);
+  }
+  if (!exhibit) {
+    exhibit = MUSEUM_EXHIBITS.find((e) => e.tourStop === stop.order);
+  }
+
+  // Badges
+  const floorBadge = $("#tourStopFloorBadge");
+  if (floorBadge) floorBadge.textContent = `Floor ${stop.floor || exhibit?.floor || 1}`;
+
+  const stepBadge = $("#tourStopStepBadge");
+  if (stepBadge) {
+    const curr = String((stopIdx !== undefined ? stopIdx + 1 : stop.order) || 1).padStart(2, "0");
+    const tot = String(totalStops || 16).padStart(2, "0");
+    stepBadge.textContent = `Stop ${curr} / ${tot}`;
+  }
+
+  // Titles
+  const titleEl = $("#tourStopTitle");
+  if (titleEl) titleEl.textContent = stop.title || exhibit?.title || "Tour Stop";
+
+  const subEl = $("#tourStopSubtitle");
+  if (subEl) subEl.textContent = stop.subtitle || exhibit?.subtitle || "";
+
+  // Description
+  const descEl = $("#tourStopDesc");
+  if (descEl) descEl.textContent = exhibit?.description || stop.desc || "";
+
+  // Image
+  const imgEl = $("#tourStopImg");
+  const mediaBox = $("#tourStopMediaBox");
+  const imgSrc = exhibit?.image || stop.imageUrl || "src/assets/images/vit/vit_technology_tower.jpg";
+  if (imgEl && mediaBox) {
+    imgEl.src = imgSrc;
+    imgEl.alt = stop.title || "Tour stop visual";
+    mediaBox.classList.remove("is-hidden");
+  }
+
+  // Key Facts List
+  const factsBox = $("#tourStopFactsBox");
+  const factsList = $("#tourStopFactsList");
+  const facts = exhibit?.facts || [];
+  if (factsBox && factsList) {
+    factsList.innerHTML = "";
+    if (facts.length > 0) {
+      facts.forEach((f) => {
+        const li = document.createElement("li");
+        li.textContent = f;
+        factsList.appendChild(li);
+      });
+      factsBox.classList.remove("is-hidden");
+    } else {
+      factsBox.classList.add("is-hidden");
+    }
+  }
+
+  // Waypoint / Perspective notes
+  const notesBox = $("#tourStopNotesBox");
+  const notesText = $("#tourStopNotesText");
+  if (notesBox && notesText) {
+    if (stop.waypointNotes) {
+      notesText.textContent = stop.waypointNotes;
+      notesBox.classList.remove("is-hidden");
+    } else {
+      notesBox.classList.add("is-hidden");
+    }
+  }
+
+  // Button disabled states
+  const prevBtn = $("#btnTourStopPrev");
+  const nextBtn = $("#btnTourStopNext");
+  const idx = stopIdx !== undefined ? stopIdx : (stop.order - 1);
+  const total = totalStops || 16;
+  if (prevBtn) prevBtn.toggleAttribute("disabled", idx <= 0);
+  if (nextBtn) nextBtn.toggleAttribute("disabled", idx >= total - 1);
+
+  popup.classList.remove("is-hidden");
+}
+
+function hideTourStopPopup() {
+  const popup = $("#tourStopPopup");
+  if (popup) popup.classList.add("is-hidden");
+}
+
+function toggleTourStopPopup() {
+  const popup = $("#tourStopPopup");
+  if (!popup) return;
+  if (popup.classList.contains("is-hidden")) {
+    const tourC = $("#tour")?.components?.["tour-guide"];
+    const stop = tourC?.stops?.[tourC?.idx || 0];
+    if (stop) {
+      showTourStopPopup(stop, tourC.idx, tourC.stops.length);
+    }
+  } else {
+    hideTourStopPopup();
+  }
+}
+
 function handleNodeInteraction(nodeName) {
   const item = INTERACTION_REGISTRY[nodeName];
   if (!item) {
@@ -3312,6 +3481,9 @@ window.VirtuMuseum.openExhibitById = openExhibitById;
 window.VirtuMuseum.openExhibitByCode = openExhibitByCode;
 window.VirtuMuseum.handleNodeInteraction = handleNodeInteraction;
 window.VirtuMuseum.switchFloor = switchFloor;
+window.VirtuMuseum.showTourStopPopup = showTourStopPopup;
+window.VirtuMuseum.hideTourStopPopup = hideTourStopPopup;
+window.VirtuMuseum.toggleTourStopPopup = toggleTourStopPopup;
 window.VirtuMuseum.jumpToTourStop = function (stopIdx) {
   const tour = $("#tour")?.components?.["tour-guide"];
   if (tour) {

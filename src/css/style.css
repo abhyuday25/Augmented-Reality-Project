@@ -649,6 +649,192 @@ button.primary:hover {
   }
 }
 
+/* --- Dedicated Guided Tour Stop Pop-up --- */
+.tourStopPopup {
+  position: fixed;
+  right: calc(20px + env(safe-area-inset-right));
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  width: 430px;
+  max-width: calc(100vw - 36px);
+  max-height: calc(100vh - 110px);
+  z-index: 38;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  animation: tourPopupSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tourPopupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tourStopPopup__card {
+  background: linear-gradient(180deg, rgba(14, 26, 52, 0.96) 0%, rgba(7, 13, 28, 0.98) 100%);
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.75), 0 0 25px var(--gold-glow);
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: calc(100vh - 110px);
+}
+
+.tourStopPopup__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 20, 42, 0.6);
+}
+
+.tourStopPopup__badges {
+  display: flex;
+  gap: 8px;
+}
+
+.tourStopPopup__close {
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.tourStopPopup__media {
+  width: 100%;
+  max-height: 180px;
+  overflow: hidden;
+  background: #060b18;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.tourStopPopup__img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.tourStopPopup__body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tourStopPopup__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.tourStopPopup__subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.tourStopPopup__desc {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #cbd5e1;
+  margin-bottom: 12px;
+}
+
+.tourStopPopup__facts {
+  background: rgba(6, 14, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.tourStopPopup__factsHeading {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--gold);
+  margin: 0 0 6px 0;
+}
+
+.tourStopPopup__factsList {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+
+.tourStopPopup__factsList li {
+  margin-bottom: 4px;
+}
+
+.tourStopPopup__notes {
+  font-size: 11.5px;
+  padding: 8px 10px;
+  background: rgba(30, 58, 138, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 8px;
+  color: #93c5fd;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tourStopNotesLabel {
+  font-weight: 700;
+  color: var(--gold);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tourStopPopup__footer {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  background: rgba(10, 20, 42, 0.6);
+}
+
+.tourStopPopup__footer button {
+  flex: 1;
+  justify-content: center;
+  font-size: 12px;
+  padding: 8px 10px;
+}
+
+@media (max-width: 600px) {
+  .tourStopPopup {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-width: none;
+    max-height: 60vh;
+  }
+  .tourStopPopup__media {
+    max-height: 120px;
+  }
+  .tourStopPopup__img {
+    height: 120px;
+  }
+}
+
 /* --- Map Modal & Interactive 2-Floor Viewer --- */
 .modal__card--map {
   width: min(840px, 94vw);

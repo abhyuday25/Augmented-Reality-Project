@@ -10,7 +10,7 @@ import sys
 import math
 import struct
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 import trimesh
 import pygltflib
 from pygltflib import (
@@ -176,7 +176,7 @@ def create_banner_texture(title, subtitle="", filename="tex_banner.png", size=(1
     img.save(path)
     return path
 
-def create_infopanel_texture(title, year, bullets, filename="tex_panel.png", size=(1024, 1024), accent_color=(59, 130, 246)):
+def create_infopanel_texture(title, year, bullets, filename="tex_panel.png", size=(1024, 1024), accent_color=(59, 130, 246), image_path=None):
     img = Image.new("RGBA", size, color=(15, 23, 42, 255))
     draw = ImageDraw.Draw(img)
     
@@ -191,10 +191,42 @@ def create_infopanel_texture(title, year, bullets, filename="tex_panel.png", siz
     draw.text((50, 60), year, font=f_yr, fill=(212, 175, 55))
     draw.text((50, 125), title, font=f_title, fill=(255, 255, 255))
     
-    draw.rounded_rectangle([50, 230, size[0]-50, 520], radius=12, fill=(30, 41, 59), outline=(71, 85, 105), width=2)
-    f_ill = get_font(34, bold=True)
-    draw.text((size[0]//2, 360), f"[ {title} ]", font=f_ill, fill=(148, 163, 184), anchor="mm")
-    draw.text((size[0]//2, 420), "VIT Vellore Archives & Media", font=get_font(24), fill=(100, 116, 139), anchor="mm")
+    box_x0, box_y0, box_x1, box_y1 = 50, 230, size[0] - 50, 520
+    box_w = box_x1 - box_x0
+    box_h = box_y1 - box_y0
+    
+    image_rendered = False
+    if image_path and os.path.exists(image_path):
+        try:
+            src = Image.open(image_path)
+            if src.mode in ("RGBA", "LA") or (src.mode == "P" and "transparency" in src.info):
+                src_rgba = src.convert("RGBA")
+                src_rgba.thumbnail((box_w - 40, box_h - 20), Image.Resampling.LANCZOS)
+                bg_box = Image.new("RGBA", (box_w, box_h), (20, 32, 54, 255))
+                px = (box_w - src_rgba.width) // 2
+                py = (box_h - src_rgba.height) // 2
+                bg_box.paste(src_rgba, (px, py), mask=src_rgba.split()[3])
+                fitted = bg_box
+            else:
+                src_rgb = src.convert("RGB")
+                fitted = ImageOps.fit(src_rgb, (box_w, box_h), method=Image.Resampling.LANCZOS)
+                fitted = fitted.convert("RGBA")
+                
+            mask = Image.new("L", (box_w, box_h), 0)
+            mask_draw = ImageDraw.Draw(mask)
+            mask_draw.rounded_rectangle([0, 0, box_w, box_h], radius=12, fill=255)
+            
+            img.paste(fitted, (box_x0, box_y0), mask=mask)
+            draw.rounded_rectangle([box_x0, box_y0, box_x1, box_y1], radius=12, outline=(212, 175, 55), width=3)
+            image_rendered = True
+        except Exception as e:
+            print(f"Warning: could not process image {image_path}: {e}")
+            
+    if not image_rendered:
+        draw.rounded_rectangle([box_x0, box_y0, box_x1, box_y1], radius=12, fill=(30, 41, 59), outline=(71, 85, 105), width=2)
+        f_ill = get_font(34, bold=True)
+        draw.text((size[0]//2, 360), f"[ {title} ]", font=f_ill, fill=(148, 163, 184), anchor="mm")
+        draw.text((size[0]//2, 420), "VIT Vellore Archives & Media", font=get_font(24), fill=(100, 116, 139), anchor="mm")
     
     y = 570
     for b in bullets:
@@ -821,18 +853,18 @@ def create_3d_vit_letters(center_z, y_pos=3.25, scale=0.75, depth=0.08, facing_p
     meshes = []
     
     vx_center = -0.72 * scale
-    v_height = 0.72 * scale
+    v_height = 0.687 * scale
     v_half_w = 0.28 * scale
     v_diag_len = math.sqrt(v_height**2 + v_half_w**2)
     v_angle = math.atan2(v_half_w, v_height)
     
     m_v1 = trimesh.creation.box(extents=(bar_w, v_diag_len, depth))
-    m_v1.apply_transform(trimesh.transformations.rotation_matrix(-v_angle, [0, 0, 1]))
+    m_v1.apply_transform(trimesh.transformations.rotation_matrix(v_angle, [0, 0, 1]))
     m_v1.apply_translation([vx_center - v_half_w/2, y_pos, center_z])
     meshes.append(m_v1)
     
     m_v2 = trimesh.creation.box(extents=(bar_w, v_diag_len, depth))
-    m_v2.apply_transform(trimesh.transformations.rotation_matrix(v_angle, [0, 0, 1]))
+    m_v2.apply_transform(trimesh.transformations.rotation_matrix(-v_angle, [0, 0, 1]))
     m_v2.apply_translation([vx_center + v_half_w/2, y_pos, center_z])
     meshes.append(m_v2)
     
@@ -849,13 +881,15 @@ def create_3d_vit_letters(center_z, y_pos=3.25, scale=0.75, depth=0.08, facing_p
     meshes.append(m_i_bot)
     
     tx_center = 0.72 * scale
-    m_t_stem = trimesh.creation.box(extents=(bar_w * 1.1, 0.72 * scale, depth))
-    m_t_stem.apply_translation([tx_center, y_pos - 0.03 * scale, center_z])
-    meshes.append(m_t_stem)
-    
-    m_t_top = trimesh.creation.box(extents=(0.58 * scale, bar_w * 1.05, depth))
-    m_t_top.apply_translation([tx_center, y_pos + 0.33 * scale, center_z])
+    t_top_h = bar_w * 0.95
+    m_t_top = trimesh.creation.box(extents=(0.58 * scale, t_top_h, depth))
+    m_t_top.apply_translation([tx_center, y_pos + 0.3605 * scale - t_top_h / 2, center_z])
     meshes.append(m_t_top)
+    
+    t_stem_h = 0.721 * scale - t_top_h / 2
+    m_t_stem = trimesh.creation.box(extents=(bar_w * 1.1, t_stem_h, depth))
+    m_t_stem.apply_translation([tx_center, y_pos - t_top_h / 4, center_z])
+    meshes.append(m_t_stem)
     
     combined = trimesh.util.concatenate(meshes)
     return combined
@@ -874,19 +908,74 @@ tex_finale = create_finale_texture()
 tex_history_hdr = create_banner_texture("THE VIT JOURNEY", "Four Decades of Academic & Institutional Evolution", "tex_history_hdr.png")
 tex_acad_hdr = create_banner_texture("ACADEMICS AT VIT", "Multidisciplinary Schools, FFCS & Global Programs", "tex_acad_hdr.png")
 
-# Infopanels
-p1 = create_infopanel_texture("Foundation & Vision", "1984", ["Founded as Vellore Engineering College (VEC)", "Established by Dr. G. Viswanathan with 180 students", "Pioneered self-financing engineering education"], "tex_p1.png")
-p2 = create_infopanel_texture("Deemed University Status", "2001", ["Conferred Deemed-to-be-University status", "Rapid academic expansion across disciplines", "National recognition for pedagogical innovation"], "tex_p2.png")
-p3 = create_infopanel_texture("Campus Infrastructure", "2008", ["Construction of iconic Technology Tower (TT)", "State-of-the-art smart classrooms and research labs", "Expansion of residential and sports complexes"], "tex_p3.png")
-p4 = create_infopanel_texture("International Accreditations", "2015", ["First in India to secure ABET accreditations", "Global academic exchanges with 300+ universities", "Expansion of multi-disciplinary schools"], "tex_p4.png")
-p5 = create_infopanel_texture("Institution of Eminence", "2019", ["Recognized as an Institution of Eminence (IoE)", "Massive surge in international research citations", "Launch of cutting-edge AI, IoT and Robotics centers"], "tex_p5.png")
-p6 = create_infopanel_texture("Global Tech & Innovation", "2023", ["VITTBI incubates 150+ student and faculty startups", "Record placement offers from Fortune 500 tech firms", "Top national rankings in innovation and patents"], "tex_p6.png")
-p7 = create_infopanel_texture("VIT Today & Beyond", "Present", ["Over 40,000+ students from across 50+ countries", "Ranked among top global universities in QS & THE", "Leading future engineering & sustainable tech"], "tex_p7.png")
+# Infopanels with authentic images for History and Academics sections
+p1 = create_infopanel_texture(
+    "Foundation & Vision", "1984",
+    ["Founded as Vellore Engineering College (VEC)", "Established by Dr. G. Viswanathan with 180 students", "Pioneered self-financing engineering education"],
+    "tex_p1.png",
+    image_path=os.path.join(VIT_IMG_DIR, "dr_g_viswanathan.jpg")
+)
+p2 = create_infopanel_texture(
+    "Deemed University Status", "2001",
+    ["Conferred Deemed-to-be-University status", "Rapid academic expansion across disciplines", "National recognition for pedagogical innovation"],
+    "tex_p2.png",
+    image_path=os.path.join(VIT_IMG_DIR, "vit_seal_official.png")
+)
+p3 = create_infopanel_texture(
+    "Campus Infrastructure", "2008",
+    ["Construction of iconic Technology Tower (TT)", "State-of-the-art smart classrooms and research labs", "Expansion of residential and sports complexes"],
+    "tex_p3.png",
+    image_path=os.path.join(VIT_IMG_DIR, "vit_technology_tower.jpg")
+)
+p4 = create_infopanel_texture(
+    "International Accreditations", "2015",
+    ["First in India to secure ABET accreditations", "Global academic exchanges with 300+ universities", "Expansion of multi-disciplinary schools"],
+    "tex_p4.png",
+    image_path=os.path.join(VIT_IMG_DIR, "vit_admin_building.jpg")
+)
+p5 = create_infopanel_texture(
+    "Institution of Eminence", "2019",
+    ["Recognized as an Institution of Eminence (IoE)", "Massive surge in international research citations", "Launch of cutting-edge AI, IoT and Robotics centers"],
+    "tex_p5.png",
+    image_path=os.path.join(VIT_IMG_DIR, "vit_logo_official.png")
+)
+p6 = create_infopanel_texture(
+    "Global Tech & Innovation", "2023",
+    ["VITTBI incubates 150+ student and faculty startups", "Record placement offers from Fortune 500 tech firms", "Top national rankings in innovation and patents"],
+    "tex_p6.png",
+    image_path=os.path.join(VIT_IMG_DIR, "vit_technology_tower.jpg")
+)
+p7 = create_infopanel_texture(
+    "VIT Today & Beyond", "Present",
+    ["Over 40,000+ students from across 50+ countries", "Ranked among top global universities in QS & THE", "Leading future engineering & sustainable tech"],
+    "tex_p7.png",
+    image_path=os.path.join(VIT_IMG_DIR, "vit_main_gate.jpg")
+)
 
-a1 = create_infopanel_texture("Schools of Computing & Tech", "Engineering", ["SCOPE & SITE: Computing, AI & Data Science", "SELECT: Electrical & Electronics Engineering", "SMEC: Mechanical & Automotive Innovation"], "tex_a1.png", accent_color=(16, 185, 129))
-a2 = create_infopanel_texture("Advanced Research Centers", "Discovery", ["Center for Nanotechnology & Clean Energy", "Biomedical & Healthcare Innovation Labs", "Autonomous Systems & Robotics Laboratories"], "tex_a2.png", accent_color=(16, 185, 129))
-a3 = create_infopanel_texture("VITTBI Innovation Incubator", "Entrepreneurship", ["Funded by DST, Government of India", "Nurturing student startup ecosystems", "Seed funding, mentorship & patent filing support"], "tex_a3.png", accent_color=(16, 185, 129))
-a4 = create_infopanel_texture("Global Academic Partnerships", "Collaboration", ["Joint degree programs with top US & EU universities", "Semester Abroad Programs (SAP)", "International faculty and research symposiums"], "tex_a4.png", accent_color=(16, 185, 129))
+a1 = create_infopanel_texture(
+    "Schools of Computing & Tech", "Engineering",
+    ["SCOPE & SITE: Computing, AI & Data Science", "SELECT: Electrical & Electronics Engineering", "SMEC: Mechanical & Automotive Innovation"],
+    "tex_a1.png", accent_color=(16, 185, 129),
+    image_path=os.path.join(VIT_IMG_DIR, "vit_technology_tower.jpg")
+)
+a2 = create_infopanel_texture(
+    "Advanced Research Centers", "Discovery",
+    ["Center for Nanotechnology & Clean Energy", "Biomedical & Healthcare Innovation Labs", "Autonomous Systems & Robotics Laboratories"],
+    "tex_a2.png", accent_color=(16, 185, 129),
+    image_path=os.path.join(VIT_IMG_DIR, "vit_sjt_academic.jpg")
+)
+a3 = create_infopanel_texture(
+    "VITTBI Innovation Incubator", "Entrepreneurship",
+    ["Funded by DST, Government of India", "Nurturing student startup ecosystems", "Seed funding, mentorship & patent filing support"],
+    "tex_a3.png", accent_color=(16, 185, 129),
+    image_path=os.path.join(VIT_IMG_DIR, "vit_logo_official.png")
+)
+a4 = create_infopanel_texture(
+    "Global Academic Partnerships", "Collaboration",
+    ["Joint degree programs with top US & EU universities", "Semester Abroad Programs (SAP)", "International faculty and research symposiums"],
+    "tex_a4.png", accent_color=(16, 185, 129),
+    image_path=os.path.join(VIT_IMG_DIR, "vit_library.jpg")
+)
 
 tex_achievements = create_achievements_wall_texture()
 tex_student_life = create_student_life_texture()
@@ -935,7 +1024,7 @@ mat_hist_hdr = builder.get_or_create_material("Mat_History_Header", roughness=0.
 mat_acad_hdr = builder.get_or_create_material("Mat_Academics_Header", roughness=0.3, metallic=0.1, texture_path=tex_acad_hdr)
 mat_res_hdr = builder.get_or_create_material("Mat_Research_Header", roughness=0.3, metallic=0.1, texture_path=tex_research_hdr)
 mat_res_table = builder.get_or_create_material("Mat_Research_Table", roughness=0.2, metallic=0.1, texture_path=tex_research_table, double_sided=True)
-mat_global_map = builder.get_or_create_material("Mat_Global_Map", roughness=0.25, metallic=0.1, texture_path=tex_global_map, double_sided=True)
+mat_global_map = builder.get_or_create_material("Mat_Global_Map", roughness=0.25, metallic=0.1, texture_path=tex_global_map, double_sided=False)
 mat_finale = builder.get_or_create_material("Mat_Finale_Banner", roughness=0.25, metallic=0.15, texture_path=tex_finale, double_sided=True)
 mat_stair_sign = builder.get_or_create_material("Mat_Stair_Sign", roughness=0.25, metallic=0.1, texture_path=tex_stair_sign, double_sided=True)
 mat_elevator_sign = builder.get_or_create_material("Mat_Elevator_Sign", roughness=0.25, metallic=0.1, texture_path=tex_elevator_sign, double_sided=True)
@@ -1365,10 +1454,42 @@ node_ach = builder.create_node("Floor02_Achievements_Section", ach_prims)
 root_children.append(node_ach)
 root_children.append(builder.create_node("INTERACT_Achievements", translation=[8.5, 7.5, -16.0]))
 
-# Floor 2 South Wall: Global VIT
+# Floor 2 South Wall: Global VIT (Dual-sided so text is correctly readable from both inside and outside)
 global_prims = []
-gm_v, gm_i, gm_n, gm_uv = create_vertical_panel_plane(13.5, 4.4, center=(0.0, 7.4, 14.15), normal=(0, 0, -1))
-global_prims.append(builder.add_mesh_primitive(gm_v, gm_i, gm_n, gm_uv, mat_global_map))
+
+# Inside-facing panel (facing -Z, viewed from inside museum looking South towards +Z)
+gm_in_v = np.array([
+    [ 6.75, 5.2, 14.145],
+    [-6.75, 5.2, 14.145],
+    [-6.75, 9.6, 14.145],
+    [ 6.75, 9.6, 14.145],
+], dtype=np.float32)
+gm_in_uv = np.array([
+    [0.0, 1.0],
+    [1.0, 1.0],
+    [1.0, 0.0],
+    [0.0, 0.0]
+], dtype=np.float32)
+gm_in_i = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
+gm_in_n = np.tile(np.array([0.0, 0.0, -1.0], dtype=np.float32), (4, 1))
+global_prims.append(builder.add_mesh_primitive(gm_in_v, gm_in_i, gm_in_n, gm_in_uv, mat_global_map))
+
+# Outside-facing panel (facing +Z, viewed from outside museum looking North towards -Z)
+gm_out_v = np.array([
+    [-6.75, 5.2, 14.155],
+    [ 6.75, 5.2, 14.155],
+    [ 6.75, 9.6, 14.155],
+    [-6.75, 9.6, 14.155],
+], dtype=np.float32)
+gm_out_uv = np.array([
+    [0.0, 1.0],
+    [1.0, 1.0],
+    [1.0, 0.0],
+    [0.0, 0.0]
+], dtype=np.float32)
+gm_out_i = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
+gm_out_n = np.tile(np.array([0.0, 0.0, 1.0], dtype=np.float32), (4, 1))
+global_prims.append(builder.add_mesh_primitive(gm_out_v, gm_out_i, gm_out_n, gm_out_uv, mat_global_map))
 
 node_global = builder.create_node("Floor02_Global_Section", global_prims)
 root_children.append(node_global)
@@ -1412,33 +1533,48 @@ root_children.append(builder.create_node("INTERACT_Convocation", translation=[6.
 root_children.append(builder.create_node("INTERACT_Finale", translation=[0.0, 7.4, -6.0]))
 
 
-# ----------------- 7. COMPATIBILITY ANCHOR PLANES (PLANE_001 to PLANE_031) -----------------
-for i in range(1, 11):
+# ----------------- 7. COMPATIBILITY ANCHOR NODES (PLANE_001 to PLANE_031) -----------------
+# Pure transform nodes (no visible geometry) positioned exactly at the corresponding exhibit panels
+# Ensures zero visual overlapping placeholders while retaining full backward compatibility for click hitboxes
+
+# Floor 1 History Panels 1 to 7 aligned with Section 5 z_hist
+for i in range(1, 8):
     code = f"{i:03d}"
-    pz = -13.5 + (i - 1) * 1.9
-    pv, pi, pn, puv = create_vertical_panel_plane(1.4, 1.1, center=(-18.05, 2.5, pz), normal=(1, 0, 0))
-    p_node = builder.create_node(f"PLANE_{code}", [builder.add_mesh_primitive(pv, pi, pn, puv, mat_panels_hist[min(i-1, 6)])])
+    pz = z_hist[i - 1]
+    p_node = builder.create_node(f"PLANE_{code}", translation=[-18.1, 2.4, pz])
     root_children.append(p_node)
 
-for i in range(11, 21):
+for i in range(8, 11):
     code = f"{i:03d}"
-    pz = -13.5 + (i - 11) * 1.9
-    pv, pi, pn, puv = create_vertical_panel_plane(1.4, 1.1, center=(18.05, 2.5, pz), normal=(-1, 0, 0))
-    p_node = builder.create_node(f"PLANE_{code}", [builder.add_mesh_primitive(pv, pi, pn, puv, mat_panels_acad[min((i-11)%4, 3)])])
+    pz = 4.5 + (i - 7) * 1.8
+    p_node = builder.create_node(f"PLANE_{code}", translation=[-18.1, 2.4, pz])
     root_children.append(p_node)
 
+# Floor 1 Academics Panels 11 to 14 aligned with Section 5 z_acad
+for i in range(11, 15):
+    code = f"{i:03d}"
+    pz = z_acad[i - 11]
+    p_node = builder.create_node(f"PLANE_{code}", translation=[18.1, 2.4, pz])
+    root_children.append(p_node)
+
+for i in range(15, 21):
+    code = f"{i:03d}"
+    pz = 3.0 + (i - 14) * 1.8
+    p_node = builder.create_node(f"PLANE_{code}", translation=[18.1, 2.4, pz])
+    root_children.append(p_node)
+
+# Floor 2 Achievements Anchors 21 to 25
 for i in range(21, 26):
     code = f"{i:03d}"
     px = 3.0 + (i - 21) * 2.8
-    pv, pi, pn, puv = create_vertical_panel_plane(1.5, 1.2, center=(px, 7.5, -16.05), normal=(0, 0, 1))
-    p_node = builder.create_node(f"PLANE_{code}", [builder.add_mesh_primitive(pv, pi, pn, puv, mat_achieve_wall)])
+    p_node = builder.create_node(f"PLANE_{code}", translation=[px, 7.5, -16.0])
     root_children.append(p_node)
 
+# Floor 2 Student Life Anchors 26 to 32
 for i in range(26, 32):
     code = f"{i:03d}"
     pz = -12.0 + (i - 26) * 2.8
-    pv, pi, pn, puv = create_vertical_panel_plane(1.5, 1.2, center=(18.05, 7.5, pz), normal=(-1, 0, 0))
-    p_node = builder.create_node(f"PLANE_{code}", [builder.add_mesh_primitive(pv, pi, pn, puv, mat_student_wall)])
+    p_node = builder.create_node(f"PLANE_{code}", translation=[18.1, 7.5, pz])
     root_children.append(p_node)
 
 

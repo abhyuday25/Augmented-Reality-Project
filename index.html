@@ -200,6 +200,7 @@
       <div class="tourProgress__actions">
         <button id="btnTourPrevBar" class="secondary" title="Previous Stop (←)">←</button>
         <button id="btnTourNextBar" class="primary" title="Next Stop (→)">→</button>
+        <button id="btnTourInfoBar" class="secondary" title="Tour Stop Details Pop-up">Details</button>
         <button id="btnTourMap" class="secondary" title="View on Map">Map</button>
         <button id="btnTourEndBar" class="secondary" title="Exit Tour (Esc)">Exit</button>
       </div>
@@ -209,6 +210,45 @@
     <div class="interactionPrompt is-hidden" id="interactionPrompt">
       <span class="interactionPrompt__key">E</span>
       <span class="interactionPrompt__text" id="interactionPromptText">Explore Exhibit</span>
+    </div>
+
+    <!-- Dedicated Guided Tour Stop Information Pop-up -->
+    <div class="tourStopPopup is-hidden" id="tourStopPopup" role="dialog" aria-modal="false" aria-labelledby="tourStopTitle">
+      <div class="tourStopPopup__card">
+        <div class="tourStopPopup__header">
+          <div class="tourStopPopup__badges">
+            <span class="badge badge--floor" id="tourStopFloorBadge">Floor 1</span>
+            <span class="badge badge--category" id="tourStopStepBadge">Stop 01 / 16</span>
+          </div>
+          <button class="secondary tourStopPopup__close" id="btnTourStopClose" title="Close Pop-up">✕</button>
+        </div>
+
+        <div class="tourStopPopup__media" id="tourStopMediaBox">
+          <img class="tourStopPopup__img" id="tourStopImg" src="" alt="Tour Stop Visual" />
+        </div>
+
+        <div class="tourStopPopup__body">
+          <h2 class="tourStopPopup__title" id="tourStopTitle">—</h2>
+          <div class="tourStopPopup__subtitle" id="tourStopSubtitle">—</div>
+          <div class="tourStopPopup__desc" id="tourStopDesc">—</div>
+
+          <div class="tourStopPopup__facts" id="tourStopFactsBox">
+            <div class="tourStopPopup__factsHeading">Key Facts & Verified Highlights</div>
+            <ul class="tourStopPopup__factsList" id="tourStopFactsList"></ul>
+          </div>
+
+          <div class="tourStopPopup__notes" id="tourStopNotesBox">
+            <span class="tourStopNotesLabel">Tour Waypoint & Perspective</span>
+            <span id="tourStopNotesText">—</span>
+          </div>
+        </div>
+
+        <div class="tourStopPopup__footer">
+          <button class="secondary" id="btnTourStopPrev">← Prev</button>
+          <button class="secondary" id="btnTourStopExhibit" title="Open Full Exhibit Drawer">Exhibits ↗</button>
+          <button class="primary" id="btnTourStopNext">Next Stop →</button>
+        </div>
+      </div>
     </div>
 
     <!-- Responsive Museum Exhibit Information Drawer -->
