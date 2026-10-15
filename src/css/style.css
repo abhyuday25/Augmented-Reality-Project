@@ -1,17 +1,55 @@
+/* ==========================================================================
+   VIT VELLORE VIRTUAL MUSEUM — UI/UX DESIGN SYSTEM & STYLESHEET
+   UI/UX CHANGE: Elevated Glassmorphic Design System (14px radius, #4F8CFF accent,
+   48px touch targets, 8pt spatial grid, smooth spring-ease micro-interactions)
+   ========================================================================== */
+
 :root {
-  --bg: rgba(10, 18, 36, 0.85);
-  --bg2: rgba(7, 12, 24, 0.94);
-  --border: rgba(212, 175, 55, 0.25);
-  --border-subtle: rgba(255, 255, 255, 0.12);
+  /* --- UI/UX CHANGE: Modern Dark Glassmorphic Color Palette --- */
+  --bg-primary: #060a12;
+  --bg-glass: rgba(10, 16, 28, 0.76);
+  --bg-glass-card: rgba(13, 22, 40, 0.82);
+  --bg-glass-elevated: rgba(18, 30, 54, 0.90);
+  --bg-glass-subtle: rgba(255, 255, 255, 0.04);
+
+  /* Primary Accent: Electric Royal Blue (#4F8CFF) */
+  --accent: #4F8CFF;
+  --accent-hover: #70a4ff;
+  --accent-active: #3b76e8;
+  --accent-glow: rgba(79, 140, 255, 0.38);
+  --accent-subtle: rgba(79, 140, 255, 0.14);
+  --accent-border: rgba(79, 140, 255, 0.45);
+
+  /* Neutral Slates & Grays */
   --txt: #f8fafc;
-  --muted: #94a3b8;
-  --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-  --accent: #3b82f6;
-  --accent-navy: #1e3a8a;
+  --txt-muted: #94a3b8;
+  --txt-dim: #64748b;
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-highlight: rgba(255, 255, 255, 0.22);
+
+  /* Heritage Secondary Accents */
   --gold: #d4af37;
-  --gold-glow: rgba(212, 175, 55, 0.4);
-  --blue-glow: rgba(59, 130, 246, 0.35);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --gold-glow: rgba(212, 175, 55, 0.35);
+  --emerald: #10b981;
+  --emerald-glow: rgba(16, 185, 129, 0.35);
+
+  /* UI/UX CHANGE: Strict 14px Glass Corner System */
+  --radius-glass: 14px;
+  --radius-sm: 8px;
+  --radius-round: 9999px;
+
+  /* UI/UX CHANGE: Depth & Glass Shadows */
+  --shadow-glass: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-subtle);
+  --shadow-glass-lg: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-glass);
+  --shadow-glow: 0 0 24px var(--accent-glow);
+  --blur-glass: blur(16px) saturate(180%);
+
+  /* UI/UX CHANGE: Micro-Interaction Easing & 8pt Grid */
+  --transition-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 *,
@@ -28,10 +66,12 @@ body {
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: #060a12;
+  background: var(--bg-primary);
   color: var(--txt);
   overflow: hidden;
   user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .a-enter-vr,
@@ -43,66 +83,460 @@ body {
   display: none !important;
 }
 
-/* --- Base Buttons --- */
+/* ==========================================================================
+   UI/UX CHANGE: BASE BUTTONS & 48PX TOUCH TARGETS
+   ========================================================================== */
 button {
   appearance: none;
-  border: 1px solid var(--border-subtle);
-  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
   color: var(--txt);
-  padding: 9px 14px;
-  border-radius: 10px;
+  padding: 12px 18px;
+  min-height: 48px;
+  border-radius: var(--radius-glass);
   cursor: pointer;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-glass);
   font-family: var(--font-sans);
   font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.3px;
-  backdrop-filter: blur(12px);
-  transition: all 0.2s ease;
+  font-size: 13.5px;
+  letter-spacing: 0.2px;
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  transition: all var(--transition-smooth);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  outline: none;
 }
 
 button:hover {
-  border-color: var(--gold);
-  background: rgba(30, 48, 80, 0.95);
-  box-shadow: 0 4px 18px var(--blue-glow);
+  border-color: var(--accent-border);
+  background: var(--bg-glass-elevated);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), var(--shadow-glow);
+  color: #ffffff;
 }
 
 button:active {
-  transform: translateY(1px);
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 button.secondary {
-  background: rgba(10, 16, 30, 0.78);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--bg-glass-card);
+  border-color: var(--border-subtle);
+  color: var(--txt-muted);
+}
+
+button.secondary:hover {
+  color: #ffffff;
+  border-color: var(--border-glass);
+  background: var(--bg-glass-elevated);
 }
 
 button.primary,
 button.btn-primary {
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
-  border-color: var(--gold);
-  color: #fff;
+  background: linear-gradient(135deg, #2563eb, var(--accent));
+  border: 1px solid var(--border-highlight);
+  color: #ffffff;
+  box-shadow: 0 4px 20px var(--accent-glow);
 }
 
 button.primary:hover {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 28px rgba(79, 140, 255, 0.55);
 }
 
-/* --- UI Root & Top Bar --- */
+/* ==========================================================================
+   UI/UX CHANGE: LOADING EXPERIENCE (BRANDED SPLASH SCREEN)
+   ========================================================================== */
+.splashScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(14, 25, 48, 0.98) 0%, rgba(4, 7, 14, 1) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  padding: 24px;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.splashScreen.is-dismissed {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+.splashScreen__glow {
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, rgba(79, 140, 255, 0) 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  filter: blur(60px);
+  pointer-events: none;
+  animation: pulseGlow 4s infinite alternate ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.95; }
+}
+
+.splashScreen__content {
+  position: relative;
+  width: min(500px, 92vw);
+  background: var(--bg-glass-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: var(--shadow-glass-lg);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.splashScreen__logoBox {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-glass);
+  background: var(--bg-glass-subtle);
+  border: 1px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.splashScreen__logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.splashScreen__title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.splashScreen__subtitle {
+  font-size: 13.5px;
+  color: var(--txt-muted);
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.splashScreen__progressContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.splashScreen__progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-round);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  position: relative;
+}
+
+.splashScreen__progressFill {
+  height: 100%;
+  width: 10%;
+  background: linear-gradient(90deg, #2563eb, var(--accent), #93c5fd);
+  border-radius: var(--radius-round);
+  box-shadow: 0 0 16px var(--accent);
+  transition: width 0.25s ease-out;
+}
+
+.splashScreen__status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--txt-dim);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   UI/UX CHANGE: ONBOARDING (3-STEP VISUAL GUIDE OVERLAY)
+   ========================================================================== */
+.onboardingModal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.onboardingModal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 7, 14, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.onboardingModal__card {
+  position: relative;
+  width: min(580px, 94vw);
+  background: var(--bg-glass-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass-lg);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.onboardingModal__header {
+  text-align: center;
+}
+
+.onboardingModal__tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  padding: 4px 10px;
+  border-radius: var(--radius-round);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.onboardingModal__title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+}
+
+.onboardingModal__subtitle {
+  font-size: 13.5px;
+  color: var(--txt-muted);
+  margin: 0;
+}
+
+.onboardingSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.onboardingStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--bg-glass-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-glass);
+  padding: 16px;
+  transition: all var(--transition-fast);
+}
+
+.onboardingStep:hover {
+  border-color: var(--border-glass);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.onboardingStep__icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: var(--radius-glass);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.onboardingStep__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.onboardingStep__info {
+  flex: 1;
+}
+
+.onboardingStep__num {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.onboardingStep__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.onboardingStep__desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--txt-muted);
+}
+
+.onboardingModal__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.onboardingBtn {
+  width: 100%;
+  min-height: 48px;
+  font-size: 14.5px;
+}
+
+/* ==========================================================================
+   UI/UX CHANGE: CONSOLIDATED GLASSMORPHIC BOTTOM TOOLBAR
+   ========================================================================== */
+.bottomToolbar {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-glass-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
+  padding: 8px 12px;
+  box-shadow: var(--shadow-glass-lg);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  animation: slideUpToolbar 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+@keyframes slideUpToolbar {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.bottomToolbar__btn {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: var(--radius-glass);
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  color: var(--txt-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.bottomToolbar__btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  transition: transform var(--transition-fast);
+}
+
+.bottomToolbar__btn span {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+.bottomToolbar__btn:hover {
+  background: var(--bg-glass-subtle);
+  border-color: var(--border-glass);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.bottomToolbar__btn:hover svg {
+  transform: scale(1.1);
+  color: var(--accent);
+}
+
+.bottomToolbar__btn.is-active {
+  background: var(--accent-subtle);
+  border-color: var(--accent-border);
+  color: #ffffff;
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+.bottomToolbar__btn.is-active svg {
+  color: var(--accent);
+}
+
+.bottomToolbar__divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border-glass);
+  margin: 0 2px;
+}
+
+/* ==========================================================================
+   UI/UX CHANGE: UI ROOT & TOP BAR REDESIGN
+   ========================================================================== */
 .ui {
   position: fixed;
-  inset: calc(12px + env(safe-area-inset-top))
-    calc(12px + env(safe-area-inset-right)) auto
-    calc(12px + env(safe-area-inset-left));
+  inset: calc(16px + env(safe-area-inset-top))
+    calc(16px + env(safe-area-inset-right)) auto
+    calc(16px + env(safe-area-inset-left));
   z-index: 20;
   pointer-events: none;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: 16px;
 }
 
 .ui__bar {
@@ -117,8 +551,9 @@ button.primary:hover {
   position: fixed;
   inset: 0;
   z-index: 18;
-  background: rgba(4, 8, 16, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(4, 7, 14, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: none;
   pointer-events: auto;
 }
@@ -128,19 +563,23 @@ button.primary:hover {
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: rgba(11, 20, 38, 0.9);
-  border: 1px solid var(--gold);
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px var(--gold-glow);
-  backdrop-filter: blur(14px);
+  gap: 10px;
+  padding: 10px 16px;
+  min-height: 48px;
+  background: var(--bg-glass-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all var(--transition-smooth);
 }
 
 .hudFloorBadge:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), var(--shadow-glow);
 }
 
 .hudFloorNum {
@@ -148,11 +587,11 @@ button.primary:hover {
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: var(--gold);
-  padding: 2px 6px;
+  color: var(--accent);
+  padding: 3px 8px;
   border-radius: 6px;
-  background: rgba(212, 175, 55, 0.15);
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
 }
 
 .hudFloorName {
@@ -162,10 +601,10 @@ button.primary:hover {
   letter-spacing: 0.2px;
 }
 
-/* --- Guided Tour Progress Bar --- */
+/* Guided Tour Progress Bar */
 .tourProgress {
   position: fixed;
-  top: calc(14px + env(safe-area-inset-top));
+  top: calc(16px + env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 25;
@@ -174,22 +613,24 @@ button.primary:hover {
   align-items: center;
   gap: 14px;
   padding: 8px 18px;
-  background: rgba(10, 20, 42, 0.92);
-  border: 1px solid var(--gold);
-  border-radius: 999px;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7), 0 0 20px var(--gold-glow);
-  backdrop-filter: blur(16px);
-  animation: fadeInDown 0.3s ease;
+  min-height: 48px;
+  background: var(--bg-glass-elevated);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-round);
+  box-shadow: var(--shadow-glass-lg);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tourProgress__step {
   font-size: 11px;
   font-weight: 800;
-  color: var(--gold);
-  background: rgba(212, 175, 55, 0.18);
-  padding: 4px 8px;
-  border-radius: 12px;
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: var(--accent);
+  background: var(--accent-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-round);
+  border: 1px solid var(--accent-border);
 }
 
 .tourProgress__title {
@@ -208,15 +649,16 @@ button.primary:hover {
 }
 
 .tourProgress__actions button {
-  padding: 6px 10px;
+  min-height: 36px;
+  padding: 6px 12px;
   font-size: 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
-/* --- Interaction Prompt --- */
+/* Interaction Prompt (Key 'E' Prompt) */
 .interactionPrompt {
   position: fixed;
-  bottom: 35px;
+  bottom: calc(90px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   z-index: 25;
@@ -225,13 +667,20 @@ button.primary:hover {
   align-items: center;
   gap: 10px;
   padding: 10px 20px;
-  background: rgba(12, 24, 50, 0.9);
-  border: 1px solid var(--gold);
-  border-radius: 30px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 25px var(--gold-glow);
-  backdrop-filter: blur(14px);
+  min-height: 44px;
+  background: var(--bg-glass-card);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-round);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), var(--shadow-glow);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   cursor: pointer;
-  animation: bounceSubtle 2s infinite ease-in-out;
+  animation: promptPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes promptPulse {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -4px); box-shadow: 0 16px 42px rgba(0, 0, 0, 0.7), 0 0 28px var(--accent-glow); }
 }
 
 .interactionPrompt__key {
@@ -242,22 +691,17 @@ button.primary:hover {
   height: 24px;
   font-size: 12px;
   font-weight: 800;
-  color: #0c1832;
-  background: var(--gold);
+  color: #060a12;
+  background: var(--accent);
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
 .interactionPrompt__text {
   font-size: 13px;
   font-weight: 700;
   color: #ffffff;
-  letter-spacing: 0.3px;
-}
-
-@keyframes bounceSubtle {
-  0%, 100% { transform: translate(-50%, 0); }
-  50% { transform: translate(-50%, -6px); }
+  letter-spacing: 0.2px;
 }
 
 @keyframes fadeInDown {
@@ -265,7 +709,9 @@ button.primary:hover {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* --- Welcome / Start Screen Modal --- */
+/* ==========================================================================
+   UI/UX CHANGE: WELCOME / START SCREEN MODAL
+   ========================================================================== */
 .welcome {
   position: fixed;
   inset: 0;
@@ -273,18 +719,21 @@ button.primary:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  background: radial-gradient(circle at center, rgba(16, 32, 64, 0.85) 0%, rgba(5, 10, 20, 0.96) 80%);
-  backdrop-filter: blur(12px);
+  padding: 24px;
+  background: radial-gradient(circle at center, rgba(14, 25, 48, 0.88) 0%, rgba(4, 7, 14, 0.98) 85%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .welcome__card {
-  width: min(580px, 92vw);
-  background: linear-gradient(180deg, rgba(18, 32, 64, 0.94) 0%, rgba(10, 18, 38, 0.96) 100%);
-  border: 1px solid var(--gold);
-  border-radius: 18px;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 35px var(--gold-glow);
-  padding: 28px 24px 22px;
+  width: min(600px, 94vw);
+  background: var(--bg-glass-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass-lg);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  padding: 36px 30px 28px;
   text-align: center;
   animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -295,16 +744,16 @@ button.primary:hover {
 }
 
 .welcome__brand {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--accent);
   margin-bottom: 8px;
 }
 
 .welcome__title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   color: #ffffff;
   margin-bottom: 12px;
@@ -313,9 +762,9 @@ button.primary:hover {
 
 .welcome__subtitle {
   font-size: 14px;
-  line-height: 1.55;
-  color: var(--muted);
-  margin-bottom: 22px;
+  line-height: 1.6;
+  color: var(--txt-muted);
+  margin-bottom: 24px;
 }
 
 .welcome__buttons {
@@ -327,50 +776,48 @@ button.primary:hover {
 }
 
 .welcome__buttons button {
-  padding: 12px 22px;
+  padding: 13px 24px;
   font-size: 14px;
-  border-radius: 12px;
-}
-
-.welcome__buttons button:first-child {
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
-  border-color: var(--gold);
+  border-radius: var(--radius-glass);
 }
 
 .welcome__opts {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   text-align: left;
-  background: rgba(6, 12, 26, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 16px;
+  background: var(--bg-glass-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-glass);
+  padding: 14px 16px;
+  margin-bottom: 18px;
 }
 
 .welcome__hint {
   font-size: 12px;
-  color: var(--muted);
-  line-height: 1.45;
+  color: var(--txt-dim);
+  line-height: 1.5;
 }
 
-/* --- Side Menu Panel --- */
+/* ==========================================================================
+   UI/UX CHANGE: SIDE MENU & CONTROLS PANEL
+   ========================================================================== */
 .ui__panel {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  width: min(380px, 86vw);
+  width: min(400px, 88vw);
   z-index: 25;
-  background: linear-gradient(180deg, rgba(14, 25, 48, 0.96) 0%, rgba(8, 14, 28, 0.98) 100%);
-  border-right: 1px solid var(--border);
-  box-shadow: 20px 0 60px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(20px);
-  padding: 22px 18px;
+  background: var(--bg-glass-card);
+  border-right: 1px solid var(--border-glass);
+  box-shadow: 20px 0 60px rgba(0, 0, 0, 0.75);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  padding: 28px 24px;
   overflow-y: auto;
   transform: translateX(-105%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: auto;
 }
 
@@ -379,24 +826,25 @@ button.primary:hover {
 }
 
 .ui__panelHeader {
-  margin-bottom: 18px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .ui__title {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 800;
-  color: var(--gold);
+  color: #ffffff;
 }
 
 .ui__subtitle {
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 12.5px;
+  color: var(--txt-muted);
+  margin-top: 2px;
 }
 
 .ui__section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .ui__sectionTitle {
@@ -404,16 +852,17 @@ button.primary:hover {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--gold);
-  margin-bottom: 8px;
+  color: var(--accent);
+  margin-bottom: 12px;
 }
 
 .ui__row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  margin-bottom: 8px;
+  gap: 12px;
+  font-size: 13.5px;
+  margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .ui__row--split {
@@ -421,24 +870,27 @@ button.primary:hover {
 }
 
 .ui__hint {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.4;
-  margin-top: 6px;
+  font-size: 12px;
+  color: var(--txt-dim);
+  line-height: 1.45;
+  margin-top: 8px;
 }
 
-/* --- Responsive Academic Exhibit Drawer (Panel) --- */
+/* ==========================================================================
+   UI/UX CHANGE: EXHIBIT DRAWER (GLASSMORPHISM PANEL)
+   ========================================================================== */
 .exhibitDrawer {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(440px, 92vw);
+  width: min(460px, 94vw);
   z-index: 30;
-  background: linear-gradient(180deg, rgba(13, 24, 48, 0.96) 0%, rgba(7, 13, 28, 0.98) 100%);
-  border-left: 1px solid var(--gold);
-  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.8), 0 0 35px var(--gold-glow);
-  backdrop-filter: blur(20px);
+  background: var(--bg-glass-card);
+  border-left: 1px solid var(--border-glass);
+  box-shadow: -20px 0 70px rgba(0, 0, 0, 0.8), var(--shadow-glow);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   display: flex;
   flex-direction: column;
   transform: translateX(105%);
@@ -451,74 +903,73 @@ button.primary:hover {
 }
 
 .exhibitDrawer__header {
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-glass-subtle);
 }
 
 .exhibitDrawer__badges {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .badge {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-round);
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid transparent;
+  letter-spacing: 0.5px;
 }
 
 .badge--floor {
-  background: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
 }
 
 .badge--category {
-  background: rgba(212, 175, 55, 0.15);
-  color: var(--gold);
-  border-color: rgba(212, 175, 55, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid var(--border-glass);
 }
 
 .badge--year {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e2e8f0;
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold);
+  border: 1px solid rgba(212, 175, 55, 0.35);
 }
 
 .exhibitDrawer__close {
-  width: 32px;
-  height: 32px;
+  min-width: 40px;
+  height: 40px;
   padding: 0;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
 }
 
 .exhibitDrawer__media {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 240px;
   background: #040810;
   overflow: hidden;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .exhibitDrawer__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
 }
 
 .exhibitDrawer__img:hover {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .exhibitDrawer__imgFallback {
@@ -527,46 +978,46 @@ button.primary:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f1f3d, #081020);
-  color: var(--gold);
+  background: linear-gradient(135deg, #0e1b33, #070e1c);
+  color: var(--accent);
   font-weight: 700;
   font-size: 14px;
 }
 
 .exhibitDrawer__body {
-  padding: 18px;
+  padding: 24px;
   overflow-y: auto;
   flex: 1;
 }
 
 .exhibitDrawer__title {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 800;
   color: #ffffff;
   margin: 0 0 6px 0;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .exhibitDrawer__subtitle {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--gold);
-  margin-bottom: 14px;
+  color: var(--accent);
+  margin-bottom: 16px;
 }
 
 .exhibitDrawer__desc {
   font-size: 13.5px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: #cbd5e1;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .exhibitDrawer__facts {
-  background: rgba(6, 12, 26, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 16px;
+  background: var(--bg-glass-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-glass);
+  padding: 16px;
+  margin-bottom: 20px;
 }
 
 .exhibitDrawer__factsHeading {
@@ -574,28 +1025,28 @@ button.primary:hover {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--gold);
-  margin: 0 0 8px 0;
+  color: var(--accent);
+  margin: 0 0 10px 0;
 }
 
 .exhibitDrawer__factsList {
   margin: 0;
-  padding-left: 18px;
-  font-size: 12.5px;
+  padding-left: 20px;
+  font-size: 13px;
   color: #e2e8f0;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .exhibitDrawer__factsList li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .exhibitDrawer__provenance {
-  font-size: 11.5px;
-  padding: 10px 12px;
-  background: rgba(30, 58, 138, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 10px;
+  font-size: 12px;
+  padding: 12px 14px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-glass);
   color: #93c5fd;
   display: flex;
   flex-direction: column;
@@ -604,44 +1055,43 @@ button.primary:hover {
 
 .provenanceLabel {
   font-weight: 700;
-  color: var(--gold);
+  color: var(--accent);
   font-size: 10.5px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .provenanceLink {
-  color: #60a5fa;
+  color: #93c5fd;
   text-decoration: underline;
   word-break: break-all;
 }
 
 .provenanceLink:hover {
-  color: #93c5fd;
+  color: #ffffff;
 }
 
 .exhibitDrawer__footer {
-  padding: 12px 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  background: var(--bg-glass-subtle);
 }
 
 .exhibitDrawer__footer button {
   flex: 1;
-  justify-content: center;
 }
 
-/* Mobile drawer adaptation */
 @media (max-width: 600px) {
   .exhibitDrawer {
     width: 100vw;
     top: auto;
     bottom: 0;
-    height: 78vh;
+    height: 82vh;
     border-left: none;
-    border-top: 1px solid var(--gold);
+    border-top: 1px solid var(--border-glass);
     transform: translateY(105%);
   }
   .exhibitDrawer.is-open {
@@ -649,14 +1099,16 @@ button.primary:hover {
   }
 }
 
-/* --- Dedicated Guided Tour Stop Pop-up --- */
+/* ==========================================================================
+   UI/UX CHANGE: TOUR STOP POP-UP CARD
+   ========================================================================== */
 .tourStopPopup {
   position: fixed;
-  right: calc(20px + env(safe-area-inset-right));
-  bottom: calc(20px + env(safe-area-inset-bottom));
-  width: 430px;
-  max-width: calc(100vw - 36px);
-  max-height: calc(100vh - 110px);
+  right: calc(24px + env(safe-area-inset-right));
+  bottom: calc(90px + env(safe-area-inset-bottom));
+  width: 440px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 140px);
   z-index: 38;
   display: flex;
   flex-direction: column;
@@ -665,35 +1117,30 @@ button.primary:hover {
 }
 
 @keyframes tourPopupSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .tourStopPopup__card {
-  background: linear-gradient(180deg, rgba(14, 26, 52, 0.96) 0%, rgba(7, 13, 28, 0.98) 100%);
-  border: 1px solid var(--gold);
-  border-radius: 16px;
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.75), 0 0 25px var(--gold-glow);
-  backdrop-filter: blur(16px);
+  background: var(--bg-glass-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass-lg);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  max-height: calc(100vh - 110px);
+  max-height: calc(100vh - 140px);
 }
 
 .tourStopPopup__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(10, 20, 42, 0.6);
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-glass-subtle);
 }
 
 .tourStopPopup__badges {
@@ -702,11 +1149,11 @@ button.primary:hover {
 }
 
 .tourStopPopup__close {
-  min-width: 30px;
-  height: 30px;
+  min-width: 36px;
+  height: 36px;
   padding: 0;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
 }
 
@@ -715,7 +1162,7 @@ button.primary:hover {
   max-height: 180px;
   overflow: hidden;
   background: #060b18;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .tourStopPopup__img {
@@ -726,13 +1173,13 @@ button.primary:hover {
 }
 
 .tourStopPopup__body {
-  padding: 14px 16px;
+  padding: 18px;
   overflow-y: auto;
   flex: 1;
 }
 
 .tourStopPopup__title {
-  font-size: 18px;
+  font-size: 18.5px;
   font-weight: 800;
   color: #fff;
   margin: 0 0 4px 0;
@@ -740,25 +1187,25 @@ button.primary:hover {
 }
 
 .tourStopPopup__subtitle {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--gold);
-  margin-bottom: 10px;
+  color: var(--accent);
+  margin-bottom: 12px;
 }
 
 .tourStopPopup__desc {
   font-size: 13px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: #cbd5e1;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .tourStopPopup__facts {
-  background: rgba(6, 14, 30, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
+  background: var(--bg-glass-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-glass);
+  padding: 12px 14px;
+  margin-bottom: 12px;
 }
 
 .tourStopPopup__factsHeading {
@@ -766,111 +1213,181 @@ button.primary:hover {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.7px;
-  color: var(--gold);
+  color: var(--accent);
   margin: 0 0 6px 0;
 }
 
 .tourStopPopup__factsList {
   margin: 0;
-  padding-left: 16px;
-  font-size: 12px;
+  padding-left: 18px;
+  font-size: 12.5px;
   color: #e2e8f0;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .tourStopPopup__factsList li {
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .tourStopPopup__notes {
-  font-size: 11.5px;
-  padding: 8px 10px;
-  background: rgba(30, 58, 138, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  border-radius: 8px;
+  font-size: 12px;
+  padding: 10px 12px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-glass);
   color: #93c5fd;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .tourStopNotesLabel {
   font-weight: 700;
-  color: var(--gold);
-  font-size: 10px;
+  color: var(--accent);
+  font-size: 10.5px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .tourStopPopup__footer {
-  padding: 10px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  background: rgba(10, 20, 42, 0.6);
+  gap: 10px;
+  background: var(--bg-glass-subtle);
 }
 
 .tourStopPopup__footer button {
   flex: 1;
-  justify-content: center;
-  font-size: 12px;
-  padding: 8px 10px;
 }
 
 @media (max-width: 600px) {
   .tourStopPopup {
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
+    left: 16px;
+    right: 16px;
+    bottom: 80px;
     width: auto;
     max-width: none;
     max-height: 60vh;
   }
-  .tourStopPopup__media {
-    max-height: 120px;
-  }
-  .tourStopPopup__img {
-    height: 120px;
-  }
 }
 
-/* --- Map Modal & Interactive 2-Floor Viewer --- */
+/* ==========================================================================
+   UI/UX CHANGE: MAP & DIALOG MODALS
+   ========================================================================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 7, 14, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.modal__card {
+  position: relative;
+  width: min(680px, 94vw);
+  max-height: min(84vh, 780px);
+  overflow-y: auto;
+  background: var(--bg-glass-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass-lg);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  padding: 28px 24px;
+  animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .modal__card--map {
-  width: min(840px, 94vw);
-  max-height: min(88vh, 800px);
+  width: min(880px, 94vw);
+  max-height: min(88vh, 820px);
 }
 
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.modal__subtitle {
+  font-size: 13px;
+  color: var(--txt-muted);
+  margin-top: 3px;
+}
+
+.modal__close {
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.modal__body {
+  padding: 16px 2px 14px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Map Modal Elements */
 .mapTabs {
   display: flex;
-  gap: 8px;
-  margin: 12px 0 16px;
+  gap: 10px;
+  margin: 16px 0;
 }
 
 .mapTab {
   flex: 1;
   justify-content: center;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 12px;
+  border-radius: var(--radius-glass);
   border: 1px solid var(--border-subtle);
-  background: rgba(14, 25, 50, 0.7);
-  color: var(--muted);
+  background: var(--bg-glass-subtle);
+  color: var(--txt-muted);
 }
 
 .mapTab.is-active {
-  background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
-  border-color: var(--gold);
+  background: linear-gradient(135deg, #1d4ed8, var(--accent));
+  border-color: rgba(255, 255, 255, 0.3);
   color: #ffffff;
-  box-shadow: 0 4px 15px var(--blue-glow);
+  box-shadow: 0 4px 18px var(--accent-glow);
 }
 
 .mapViewport {
   position: relative;
   width: 100%;
-  height: 380px;
-  background: #060c18;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 12px;
+  height: 400px;
+  background: #040812;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-glass);
   overflow: hidden;
 }
 
@@ -886,20 +1403,8 @@ button.primary:hover {
 
 .mapZone:hover {
   fill-opacity: 0.8 !important;
-  stroke: var(--gold) !important;
+  stroke: var(--accent) !important;
   stroke-width: 2 !important;
-}
-
-.mapPin {
-  cursor: pointer;
-}
-
-.mapPin circle {
-  transition: r 0.2s ease;
-}
-
-.mapPin:hover circle {
-  r: 14;
 }
 
 .mapPlayerBeacon {
@@ -915,11 +1420,11 @@ button.primary:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
   font-size: 12px;
-  color: var(--muted);
+  color: var(--txt-muted);
 }
 
 .mapLegend__item {
@@ -935,60 +1440,139 @@ button.primary:hover {
   border-radius: 50%;
 }
 
-.legendPin--you { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+.legendPin--you { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 .legendPin--stop { background: var(--gold); }
-.legendPin--visited { background: #10b981; color: #fff; font-size: 9px; text-align: center; line-height: 12px; }
+.legendPin--visited { background: var(--emerald); color: #fff; font-size: 9px; text-align: center; line-height: 12px; }
 .legendPin--stair { background: #8b5cf6; color: #fff; font-size: 9px; text-align: center; line-height: 12px; }
 
-/* --- Thematic Modal Overlays (Campus Model, Research Table, Global) --- */
+/* Thematic Modal Overlays */
 .clusterGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
 }
 
 .clusterCard {
-  background: rgba(15, 28, 56, 0.8);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 12px;
-  padding: 14px;
+  background: var(--bg-glass-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-glass);
+  padding: 18px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-smooth);
 }
 
 .clusterCard:hover {
-  border-color: var(--gold);
-  background: rgba(22, 42, 85, 0.95);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border-color: var(--accent-border);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), var(--shadow-glow);
 }
 
 .clusterCard__title {
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 700;
-  color: var(--gold);
+  color: #ffffff;
   margin-bottom: 4px;
 }
 
 .clusterCard__sub {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
-  color: #93c5fd;
+  color: var(--accent);
   margin-bottom: 8px;
 }
 
 .clusterCard__desc {
-  font-size: 12px;
-  line-height: 1.45;
-  color: #cbd5e1;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--txt-muted);
 }
 
-/* --- Mobile Virtual Joystick --- */
+/* ==========================================================================
+   UI/UX CHANGE: TOAST & SNACKBAR SYSTEM
+   ========================================================================== */
+.toast {
+  position: fixed;
+  bottom: calc(85px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  background: var(--bg-glass-elevated);
+  border: 1px solid var(--border-glass);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass-lg);
+  font-size: 13.5px;
+  font-weight: 600;
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast--info {
+  border-color: var(--accent-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-glow);
+}
+
+.toast--success {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px var(--emerald-glow);
+}
+
+.toast--error {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(239, 68, 68, 0.35);
+}
+
+.toast__icon {
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.toast--success .toast__icon { color: var(--emerald); }
+.toast--error .toast__icon { color: #ef4444; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 18px) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  to { opacity: 0; transform: translate(-50%, 12px) scale(0.95); }
+}
+
+/* ==========================================================================
+   UI/UX CHANGE: SPAWN GLOW & PARTICLE EFFECT
+   ========================================================================== */
+.spawnGlowEffect {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  background: radial-gradient(circle at center, var(--accent-glow) 0%, rgba(79, 140, 255, 0) 70%);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 1.2s ease-out, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spawnGlowEffect.is-active {
+  opacity: 0.85;
+  transform: scale(1.3);
+}
+
+/* ==========================================================================
+   UI/UX CHANGE: MOBILE JOYSTICK STYLING
+   ========================================================================== */
 .joystick {
   position: fixed;
-  left: calc(18px + env(safe-area-inset-left));
-  bottom: calc(24px + env(safe-area-inset-bottom));
+  left: calc(20px + env(safe-area-inset-left));
+  bottom: calc(90px + env(safe-area-inset-bottom));
   z-index: 15;
   pointer-events: auto;
   user-select: none;
@@ -996,127 +1580,30 @@ button.primary:hover {
 }
 
 .joystick__base {
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: rgba(10, 18, 38, 0.6);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  box-shadow: var(--shadow-glass);
   position: relative;
 }
 
 .joystick__stick {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(30, 58, 110, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #1d4ed8, var(--accent));
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 18px var(--accent-glow);
 }
 
 body:not(.is-touch) .joystick {
   display: none !important;
-}
-
-/* Modals */
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
-}
-
-.modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(4, 8, 18, 0.85);
-  backdrop-filter: blur(10px);
-}
-
-.modal__card {
-  position: relative;
-  width: min(640px, 92vw);
-  max-height: min(84vh, 760px);
-  overflow-y: auto;
-  background: linear-gradient(180deg, #0e1a34 0%, #070d1c 100%);
-  border: 1px solid var(--gold);
-  border-radius: 16px;
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.8), 0 0 30px var(--gold-glow);
-  padding: 20px 20px 16px;
-}
-
-.modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.modal__title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #fff;
-}
-
-.modal__subtitle {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
-.modal__close {
-  min-width: 36px;
-  height: 36px;
-  padding: 0;
-  justify-content: center;
-  border-radius: 8px;
-}
-
-.modal__body {
-  padding: 14px 2px 12px;
-  line-height: 1.5;
-  color: #e2e8f0;
-}
-
-.modal__footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 60;
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid var(--gold);
-  color: #fff;
-  padding: 10px 18px;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  font-size: 13px;
-  font-weight: 600;
-  backdrop-filter: blur(12px);
-  pointer-events: none;
-  animation: toastIn 0.25s ease-out;
-}
-
-@keyframes toastIn {
-  from { opacity: 0; transform: translate(-50%, 15px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
 }

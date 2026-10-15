@@ -69,37 +69,37 @@
   },
   {
     "order": 5,
-    "id": "tour-05-academics",
+    "id": "tour-05-schools-backwall",
     "floor": 1,
-    "pos": "14.00 0.00 -11.00",
-    "rot": "0.00 -90.00 0.00",
-    "targetPosition": [14.0, 0.0, -11.0],
-    "targetLookAt": [18.1, 2.5, -12.0],
+    "pos": "0.00 0.00 -11.50",
+    "rot": "0.00 0.00 0.00",
+    "targetPosition": [0.0, 0.0, -11.5],
+    "targetLookAt": [0.0, 2.2, -16.0],
     "moveDur": 1600,
     "lookDur": 700,
-    "wait": 1800,
-    "title": "Academic Schools & Multidisciplinary Wings",
-    "subtitle": "SCOPE, SENSE, SELECT, SMEC, Sciences & Management",
-    "desc": "15+ multidisciplinary schools offering advanced STEM curricula, state-of-the-art computational laboratories, and world-class faculty mentoring over 60 degree programs.",
-    "exhibitIds": ["acad-schools"],
-    "waypointNotes": "East Wing academic showcase entrance."
+    "wait": 2200,
+    "title": "Schools of Excellence: SCOPE, SENSE, SMEC & SELECT",
+    "subtitle": "15+ Multidisciplinary Academic Faculties on Floor 1 Back Wall",
+    "desc": "The grand northern feature wall showcases VIT's premier academic schools: SCOPE (Computer Science & AI), SENSE (Electronics & VLSI), SMEC (Mechanical & Robotics ARC), SELECT & SITE (Smart Grids & IT), alongside BioSciences, Sciences, and Business.",
+    "exhibitIds": ["exhibit-schools-wall", "school-scope", "school-sense", "school-smec", "school-select", "school-interdisciplinary"],
+    "waypointNotes": "First Floor Grand Back Wall architectural showcase directly facing the northern exhibition bays."
   },
   {
     "order": 6,
-    "id": "tour-06-ffcs",
+    "id": "tour-06-ffcs-library",
     "floor": 1,
     "pos": "14.00 0.00 -4.00",
     "rot": "0.00 -90.00 0.00",
     "targetPosition": [14.0, 0.0, -4.0],
     "targetLookAt": [18.1, 2.5, -7.0],
-    "moveDur": 1400,
+    "moveDur": 1500,
     "lookDur": 600,
     "wait": 1800,
-    "title": "Curricular Innovation: FFCS",
-    "subtitle": "Fully Flexible Credit System & Student Agency",
-    "desc": "First in India to offer true academic flexibility, enabling scholars to choose their professors, course timings, interdisciplinary minors, and semester-abroad credits.",
-    "exhibitIds": ["acad-ffcs", "campus-library"],
-    "waypointNotes": "Pedagogical innovations display and Central Library features."
+    "title": "Curricular Innovation: FFCS & Central Library",
+    "subtitle": "Fully Flexible Credit System & 6-Storey Knowledge Hub",
+    "desc": "Pioneered in India, FFCS empowers students to design their course schedules, faculty mentors, and minors. Adjacent panels honor the 6-floor Periyar E.V.R. Central Library and Main Administrative Quad.",
+    "exhibitIds": ["acad-ffcs", "campus-library", "campus-admin"],
+    "waypointNotes": "East Wing curriculum and library infrastructure showcases."
   },
   {
     "order": 7,
@@ -148,13 +148,30 @@
     "wait": 1800,
     "title": "Grand Staircase & Transition to Floor 2",
     "subtitle": "Ascend to Research, Achievements & Campus Life",
-    "desc": "Take the grand architectural staircase or use the accessible elevator to reach Floor 2: Innovation, Impact & Student Life.",
+    "desc": "Walk up the majestic, unobstructed architectural staircase or use the accessible elevator to reach Floor 2: Innovation, Impact & Student Life.",
     "exhibitIds": ["grand-staircase"],
     "waypointNotes": "South-East transition core connecting the two museum levels."
   },
   {
     "order": 10,
-    "id": "tour-10-research",
+    "id": "tour-10-stair-landing",
+    "floor": 2,
+    "pos": "12.50 5.00 13.50",
+    "rot": "0.00 180.00 0.00",
+    "targetPosition": [12.5, 5.0, 13.5],
+    "targetLookAt": [0.0, 4.0, 0.0],
+    "moveDur": 1800,
+    "lookDur": 700,
+    "wait": 1900,
+    "title": "Floor 2 Mezzanine & Grand Atrium Overlook",
+    "subtitle": "Smooth Architectural Ascent to Upper Galleries",
+    "desc": "Arrive at the upper mezzanine landing overlooking the two-floor open atrium, central monument, and ground floor exhibition wings. Floor 2 houses advanced research, achievements, and global impact.",
+    "exhibitIds": ["grand-staircase"],
+    "waypointNotes": "Floor 2 mezzanine staircase exit with panoramic atrium vista."
+  },
+  {
+    "order": 11,
+    "id": "tour-11-research",
     "floor": 2,
     "pos": "-13.00 5.00 -3.00",
     "rot": "0.00 90.00 0.00",
@@ -170,8 +187,8 @@
     "waypointNotes": "Floor 2 West Gallery Research Wing entry point."
   },
   {
-    "order": 11,
-    "id": "tour-11-research-table",
+    "order": 12,
+    "id": "tour-12-research-table",
     "floor": 2,
     "pos": "-11.00 5.00 -6.50",
     "rot": "-8.00 45.00 0.00",
@@ -187,8 +204,8 @@
     "waypointNotes": "Interactive digital table in Floor 2 West Gallery."
   },
   {
-    "order": 12,
-    "id": "tour-12-achievements",
+    "order": 13,
+    "id": "tour-13-achievements",
     "floor": 2,
     "pos": "8.00 5.00 -12.00",
     "rot": "0.00 0.00 0.00",
@@ -204,8 +221,8 @@
     "waypointNotes": "Floor 2 North Wall of Fame with trophy pedestals and medallions."
   },
   {
-    "order": 13,
-    "id": "tour-13-global",
+    "order": 14,
+    "id": "tour-14-global",
     "floor": 2,
     "pos": "0.00 5.00 6.50",
     "rot": "0.00 180.00 0.00",
@@ -221,8 +238,8 @@
     "waypointNotes": "Floor 2 South Gallery central wall facing atrium."
   },
   {
-    "order": 14,
-    "id": "tour-14-student-life",
+    "order": 15,
+    "id": "tour-15-student-life",
     "floor": 2,
     "pos": "13.00 5.00 -6.00",
     "rot": "0.00 -90.00 0.00",
@@ -238,8 +255,8 @@
     "waypointNotes": "Floor 2 East Gallery student life photo gallery wall."
   },
   {
-    "order": 15,
-    "id": "tour-15-technical-culture",
+    "order": 16,
+    "id": "tour-16-technical-culture",
     "floor": 2,
     "pos": "13.00 5.00 2.00",
     "rot": "0.00 -90.00 0.00",
@@ -255,8 +272,8 @@
     "waypointNotes": "Floor 2 East Gallery technical events and student chapters display."
   },
   {
-    "order": 16,
-    "id": "tour-16-finale",
+    "order": 17,
+    "id": "tour-17-finale",
     "floor": 2,
     "pos": "0.00 5.00 1.00",
     "rot": "0.00 0.00 0.00",

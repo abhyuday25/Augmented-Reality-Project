@@ -7,6 +7,11 @@
     <meta name="description" content="Explore Vellore Institute of Technology (VIT), Vellore in an interactive two-floor 3D virtual museum tour covering history, academics, research, achievements, and student life." />
     <link rel="icon" href="src/assets/images/vit/vit_logo_official.png" type="image/png" />
 
+    <!-- UI/UX CHANGE: Preload Google Font Inter for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
     <!-- Suppress noisy vendor console output -->
     <script>
       (function () {
@@ -66,6 +71,145 @@
   </head>
 
   <body>
+    <!-- UI/UX CHANGE: 1. LOADING EXPERIENCE — Branded Splash Screen with Animated Progress Bar -->
+    <div id="splashScreen" class="splashScreen" aria-label="Loading Virtual Museum">
+      <div class="splashScreen__glow"></div>
+      <div class="splashScreen__content">
+        <div class="splashScreen__logoBox">
+          <img src="src/assets/images/vit/vit_logo_official.png" alt="VIT Logo" class="splashScreen__logo" />
+        </div>
+        <h1 class="splashScreen__title">VIT Vellore Virtual Museum</h1>
+        <p class="splashScreen__subtitle">Architectural Two-Floor 3D Interactive Exhibition</p>
+        <div class="splashScreen__progressContainer">
+          <div class="splashScreen__progressBar">
+            <div id="splashProgressBar" class="splashScreen__progressFill"></div>
+          </div>
+          <div class="splashScreen__status">
+            <span id="splashProgressText">Loading 3D Museum Architecture & Assets...</span>
+            <span id="splashProgressPercent">15%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UI/UX CHANGE: 2. ONBOARDING — 3-Step Visual Guide Overlay with Modern Icons -->
+    <div id="onboardingGuide" class="onboardingModal is-hidden" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+      <div class="onboardingModal__backdrop" id="onboardingBackdrop"></div>
+      <div class="onboardingModal__card">
+        <div class="onboardingModal__header">
+          <div class="onboardingModal__tag">VISITOR GUIDE</div>
+          <h2 class="onboardingModal__title" id="onboardingTitle">How to Experience the Museum</h2>
+          <p class="onboardingModal__subtitle">Follow 3 quick steps to navigate and discover exhibits</p>
+        </div>
+        <div class="onboardingSteps">
+          <!-- Step 1 -->
+          <div class="onboardingStep">
+            <div class="onboardingStep__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+              </svg>
+            </div>
+            <div class="onboardingStep__info">
+              <div class="onboardingStep__num">STEP 1</div>
+              <div class="onboardingStep__title">Navigate & Explore</div>
+              <div class="onboardingStep__desc">Use <b>WASD</b> or <b>Arrow Keys</b> to walk. Drag mouse to look around 360°. On mobile, use the virtual thumb joystick.</div>
+            </div>
+          </div>
+          <!-- Step 2 -->
+          <div class="onboardingStep">
+            <div class="onboardingStep__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="22" y1="12" x2="18" y2="12"></line>
+                <line x1="6" y1="12" x2="2" y2="12"></line>
+                <line x1="12" y1="6" x2="12" y2="2"></line>
+                <line x1="12" y1="22" x2="12" y2="18"></line>
+              </svg>
+            </div>
+            <div class="onboardingStep__info">
+              <div class="onboardingStep__num">STEP 2</div>
+              <div class="onboardingStep__title">Inspect Interactive Exhibits</div>
+              <div class="onboardingStep__desc">Approach illuminated displays and press <b>E</b> or click directly to open full historical details and verified milestones.</div>
+            </div>
+          </div>
+          <!-- Step 3 -->
+          <div class="onboardingStep">
+            <div class="onboardingStep__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+            </div>
+            <div class="onboardingStep__info">
+              <div class="onboardingStep__num">STEP 3</div>
+              <div class="onboardingStep__title">Guided Tour & Floor Switch</div>
+              <div class="onboardingStep__desc">Follow the 16 curated tour stops or use the bottom toolbar to switch between Ground Floor 1 and Upper Floor 2.</div>
+            </div>
+          </div>
+        </div>
+        <div class="onboardingModal__footer">
+          <button id="btnOnboardingDismiss" class="primary onboardingBtn">Start Experience</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UI/UX CHANGE: 5. TOOLBAR — Consolidated Glassmorphic Bottom Dock Toolbar -->
+    <nav class="bottomToolbar" id="bottomToolbar" aria-label="Museum Navigation Toolbar">
+      <button class="bottomToolbar__btn" id="btnDockTour" title="Guided Tour (T)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polygon points="10 8 16 12 10 16 10 8"></polygon>
+        </svg>
+        <span>Tour</span>
+      </button>
+      <button class="bottomToolbar__btn" id="btnDockMap" title="Interactive Map (M)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+        <span>Map</span>
+      </button>
+      <button class="bottomToolbar__btn" id="btnDockFloor" title="Switch Floors (Floor 1 / Floor 2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <polyline points="7 10 12 15 17 10"></polyline>
+        </svg>
+        <span id="dockFloorLabel">Floors</span>
+      </button>
+      <div class="bottomToolbar__divider"></div>
+      <button class="bottomToolbar__btn" id="btnDockReset" title="Reset View & Position">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+        <span>Reset</span>
+      </button>
+      <button class="bottomToolbar__btn" id="btnDockAudio" title="Toggle Ambience Sound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <span>Audio</span>
+      </button>
+      <button class="bottomToolbar__btn" id="btnDockScreenshot" title="Capture High-Res Photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>Photo</span>
+      </button>
+      <button class="bottomToolbar__btn" id="btnDockHelp" title="Visitor Guide & Controls (?)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span>Guide</span>
+      </button>
+    </nav>
+
     <!-- Welcome / Start Screen -->
     <div class="welcome" id="welcome">
       <div class="welcome__card">
@@ -321,6 +465,9 @@
             <!-- Academics Wing -->
             <rect id="mapZoneAcademics" class="mapZone" x="10.5" y="-15" width="8" height="22" fill="#1e3a8a" fill-opacity="0.3" stroke="#60a5fa" stroke-width="0.3" rx="0.8" />
             <text x="14.5" y="-4" fill="#cbd5e1" font-size="1.3" font-weight="700" text-anchor="middle" transform="rotate(90 14.5 -4)">Academics, Schools & FFCS</text>
+            <!-- North Back Wall: Schools of Excellence Gallery -->
+            <rect id="mapZoneSchoolsF1" class="mapZone" x="-16" y="-16.8" width="32" height="3.2" fill="#0284c7" fill-opacity="0.35" stroke="#38bdf8" stroke-width="0.35" rx="0.6" />
+            <text x="0" y="-14.8" fill="#38bdf8" font-size="1.15" font-weight="700" text-anchor="middle">Schools Back Wall: SCOPE • SENSE • SMEC • SELECT</text>
             <!-- Central Atrium -->
             <rect id="mapZoneAtrium" class="mapZone" x="-8" y="-7" width="16" height="13" fill="#0a1426" stroke="#d4af37" stroke-dasharray="0.8 0.4" stroke-width="0.4" rx="1" />
             <!-- Central Monument -->
@@ -491,13 +638,21 @@
           id="museuGLB"
           src="src/assets/models/vit_vellore_virtual_museum.glb"
         ></a-asset-item>
+        <img id="texSchoolsHdr" src="src/assets/textures/tex_schools_header.png" />
+        <img id="texPanelSmec" src="src/assets/textures/tex_panel_smec.png" />
+        <img id="texPanelScope" src="src/assets/textures/tex_panel_scope.png" />
+        <img id="texSchoolsCentral" src="src/assets/textures/tex_schools_central.png" />
+        <img id="texPanelSense" src="src/assets/textures/tex_panel_sense.png" />
+        <img id="texPanelSelect" src="src/assets/textures/tex_panel_select.png" />
+        <img id="texSchoolsFooter" src="src/assets/textures/tex_schools_footer.png" />
       </a-assets>
 
-      <!-- Layered Two-Floor Architectural Lighting -->
+      <!-- UI/UX CHANGE: 3. MODEL PRESENTATION — Studio/HDR-Style Ambient & Rim Lighting Layer -->
+      <a-entity light="type: hemisphere; groundColor: #091326; color: #e2e8f0; intensity: 0.8"></a-entity>
       <a-entity light="type: ambient; intensity: 0.85; color: #f1f5f9"></a-entity>
       
       <!-- Primary Skylight illuminating Atrium & Both Floors -->
-      <a-entity light="type: directional; intensity: 0.8; castShadow: true" position="6 14 8"></a-entity>
+      <a-entity light="type: directional; intensity: 0.85; castShadow: true" position="6 14 8"></a-entity>
       
       <!-- Secondary Directional Light for Floor 2 North Galleries -->
       <a-entity light="type: directional; intensity: 0.6; castShadow: false" position="-6 12 -8"></a-entity>
@@ -507,6 +662,16 @@
       
       <!-- Central Monument Warm Spotlight -->
       <a-entity light="type: spot; intensity: 0.75; angle: 45; penumbra: 0.3; distance: 12; color: #fef08a" position="0 6.5 -2.0"></a-entity>
+
+      <!-- UI/UX CHANGE: 3. MODEL PRESENTATION — Soft Ground Shadow Beneath Architecture -->
+      <a-plane
+        id="modelStudioShadow"
+        position="0 0.01 0"
+        rotation="-90 0 0"
+        width="44"
+        height="40"
+        material="color: #020617; opacity: 0.55; transparent: true; roughness: 0.95"
+      ></a-plane>
 
       <!-- Museum Model -->
       <a-entity
@@ -552,10 +717,12 @@
           look-controls="enabled: true"
           wasd-controls="enabled: false"
         >
+          <!-- UI/UX CHANGE: 6. FEEDBACK — Reticle Interactive Color Target & Accent Ring -->
           <a-cursor
+            id="mainCursor"
             raycaster="objects: .hotspot, .teleportable, .quadroHitbox, .interactable"
             fuse="false"
-            material="color: #d4af37; shader: flat"
+            material="color: #4F8CFF; shader: flat"
             geometry="radiusInner: 0.003; radiusOuter: 0.006"
           ></a-cursor>
 
@@ -575,6 +742,97 @@
         tour-guide="rig: #rig; stopsUrl: src/data/tourStops.json; speed: 1.0; autoAdvance: false"
       ></a-entity>
 
+      <!-- FLOOR 1 BACK WALL: Grand Gallery of Schools (SCOPE, SENSE, SMEC, SELECT, Interdisciplinary) -->
+      <a-entity id="floor1BackWallSchools" position="0 0 -16.15">
+        <!-- Main Architectural Backdrop Wall -->
+        <a-plane
+          position="0 2.4 -0.05"
+          width="35"
+          height="4.8"
+          material="color: #081120; roughness: 0.92; metalness: 0.08"
+        ></a-plane>
+
+        <!-- Top Brass Crown Moulding -->
+        <a-box
+          position="0 4.75 0.02"
+          width="35"
+          height="0.14"
+          depth="0.22"
+          material="color: #d4af37; roughness: 0.3; metalness: 0.75"
+        ></a-box>
+
+        <!-- Bottom Baseboard -->
+        <a-box
+          position="0 0.12 0.02"
+          width="35"
+          height="0.24"
+          depth="0.18"
+          material="color: #1e293b; roughness: 0.5; metalness: 0.3"
+        ></a-box>
+
+        <!-- Grand Backlit Header Banner -->
+        <a-box
+          position="0 4.22 0.01"
+          width="26.3"
+          height="0.82"
+          depth="0.04"
+          material="color: #d4af37; roughness: 0.25; metalness: 0.8"
+        ></a-box>
+        <a-plane
+          position="0 4.22 0.04"
+          width="26.0"
+          height="0.76"
+          material="src: #texSchoolsHdr; roughness: 0.35; metalness: 0.15"
+        ></a-plane>
+
+        <!-- Architectural Warm Wall Accent Lighting -->
+        <a-entity light="type: spot; intensity: 0.85; angle: 45; penumbra: 0.5; distance: 10; color: #fffbeb" position="-8 4.6 1.8" rotation="-28 0 0"></a-entity>
+        <a-entity light="type: spot; intensity: 0.95; angle: 48; penumbra: 0.45; distance: 10; color: #fef3c7" position="0 4.6 1.8" rotation="-28 0 0"></a-entity>
+        <a-entity light="type: spot; intensity: 0.85; angle: 45; penumbra: 0.5; distance: 10; color: #fffbeb" position="8 4.6 1.8" rotation="-28 0 0"></a-entity>
+
+        <!-- BAY 1: SMEC (School of Mechanical Engineering) -->
+        <a-entity position="-12.0 2.2 0.0">
+          <a-box position="0 0 0.02" width="4.92" height="2.92" depth="0.04" material="color: #d4af37; roughness: 0.25; metalness: 0.8"></a-box>
+          <a-plane position="0 0 0.05" width="4.8" height="2.8" material="src: #texPanelSmec; roughness: 0.35; metalness: 0.15"></a-plane>
+          <a-plane class="interactable quadroHitbox" data-art="SMEC" width="4.8" height="2.8" position="0 0 0.07" material="transparent: true; opacity: 0"></a-plane>
+        </a-entity>
+
+        <!-- BAY 2: SCOPE (School of Computer Science & Engineering) -->
+        <a-entity position="-6.0 2.2 0.0">
+          <a-box position="0 0 0.02" width="4.92" height="2.92" depth="0.04" material="color: #d4af37; roughness: 0.25; metalness: 0.8"></a-box>
+          <a-plane position="0 0 0.05" width="4.8" height="2.8" material="src: #texPanelScope; roughness: 0.35; metalness: 0.15"></a-plane>
+          <a-plane class="interactable quadroHitbox" data-art="SCOPE" width="4.8" height="2.8" position="0 0 0.07" material="transparent: true; opacity: 0"></a-plane>
+        </a-entity>
+
+        <!-- BAY 3: GRAND CENTRAL DIRECTORY & EMBLEM -->
+        <a-entity position="0.0 2.2 0.0">
+          <a-box position="0 0 0.02" width="5.54" height="3.04" depth="0.06" material="color: #f5c542; roughness: 0.2; metalness: 0.85"></a-box>
+          <a-plane position="0 0 0.06" width="5.4" height="2.9" material="src: #texSchoolsCentral; roughness: 0.35; metalness: 0.15"></a-plane>
+          <a-plane class="interactable quadroHitbox" data-art="SCHOOLS_WALL" width="5.4" height="2.9" position="0 0 0.08" material="transparent: true; opacity: 0"></a-plane>
+        </a-entity>
+
+        <!-- BAY 4: SENSE (School of Electronics Engineering) -->
+        <a-entity position="6.0 2.2 0.0">
+          <a-box position="0 0 0.02" width="4.92" height="2.92" depth="0.04" material="color: #d4af37; roughness: 0.25; metalness: 0.8"></a-box>
+          <a-plane position="0 0 0.05" width="4.8" height="2.8" material="src: #texPanelSense; roughness: 0.35; metalness: 0.15"></a-plane>
+          <a-plane class="interactable quadroHitbox" data-art="SENSE" width="4.8" height="2.8" position="0 0 0.07" material="transparent: true; opacity: 0"></a-plane>
+        </a-entity>
+
+        <!-- BAY 5: SELECT & SITE (Electrical Power & Information Systems) -->
+        <a-entity position="12.0 2.2 0.0">
+          <a-box position="0 0 0.02" width="4.92" height="2.92" depth="0.04" material="color: #d4af37; roughness: 0.25; metalness: 0.8"></a-box>
+          <a-plane position="0 0 0.05" width="4.8" height="2.8" material="src: #texPanelSelect; roughness: 0.35; metalness: 0.15"></a-plane>
+          <a-plane class="interactable quadroHitbox" data-art="SELECT" width="4.8" height="2.8" position="0 0 0.07" material="transparent: true; opacity: 0"></a-plane>
+        </a-entity>
+
+        <!-- MULTIDISCIPLINARY FOOTER RIBBON -->
+        <a-entity position="0 0.48 0.0">
+          <a-box position="0 0 0.02" width="32.2" height="0.48" depth="0.02" material="color: #1e293b; roughness: 0.5; metalness: 0.4"></a-box>
+          <a-plane position="0 0 0.04" width="32.0" height="0.44" material="src: #texSchoolsFooter; roughness: 0.4; metalness: 0.1"></a-plane>
+          <a-plane class="interactable quadroHitbox" data-art="INTERDISCIPLINARY" width="32.0" height="0.44" position="0 0 0.06" material="transparent: true; opacity: 0"></a-plane>
+        </a-entity>
+      </a-entity>
+
       <!-- Hitbox & Model Node Binding Script -->
       <script>
         const museuEl = document.querySelector("#museuModel");
@@ -586,6 +844,39 @@
         museuEl.addEventListener("model-loaded", () => {
           const root = museuEl.getObject3D("mesh");
           if (!root) return;
+
+          // 0. ARCHITECTURAL FIX: Clear wall primitives obstructing the Grand Staircase
+          // Detect wall primitive (m_sdiv_e) that spans x: [10, 18.5], z: [8.2, 8.8], y: [0, 10]
+          // cutting right across the stairs and hiding them
+          root.traverse((node) => {
+            if (node.isMesh && node.geometry) {
+              node.geometry.computeBoundingBox();
+              const bb = node.geometry.boundingBox;
+              if (bb) {
+                const overlapsStairX = bb.max.x >= 10.5 && bb.min.x <= 14.5;
+                const overlapsStairZ = bb.max.z >= 8.0 && bb.min.z <= 9.0;
+                const isTallWall = (bb.max.y - bb.min.y) > 6.0;
+                if (overlapsStairX && overlapsStairZ && isTallWall) {
+                  node.visible = false;
+                  node.raycast = () => {};
+                }
+                // Make lobby dividing wall m_lobby_e (x: 10.2 to 10.8, z: 8.5 to 18.0)
+                // elegant and semi-transparent so the staircase is open and visible
+                if (bb.min.x >= 10.1 && bb.max.x <= 10.9 && bb.min.z >= 8.0 && bb.max.z <= 18.2 && isTallWall) {
+                  const mats = Array.isArray(node.material) ? node.material : [node.material];
+                  mats.forEach((m) => {
+                    if (m) {
+                      m.transparent = true;
+                      m.opacity = 0.28;
+                      m.roughness = 0.1;
+                      m.metalness = 0.1;
+                      m.needsUpdate = true;
+                    }
+                  });
+                }
+              }
+            }
+          });
 
           // 1. Compatibility anchor planes (PLANE_001 to PLANE_031)
           for (let i = 1; i <= 31; i++) {
@@ -626,6 +917,8 @@
             "INTERACT_History_UniversityStatus", "INTERACT_CampusPhoto_TechnologyTower",
             "INTERACT_History_ABET", "INTERACT_History_IoE", "INTERACT_Campus_Model",
             "INTERACT_Central_Sculpture", "INTERACT_Academics", "INTERACT_FFCS",
+            "INTERACT_Schools_Wall", "INTERACT_School_SCOPE", "INTERACT_School_SENSE",
+            "INTERACT_School_SMEC", "INTERACT_School_SELECT", "INTERACT_School_Interdisciplinary",
             "INTERACT_CampusPhoto_Library", "INTERACT_CampusPhoto_MainBuilding",
             "INTERACT_GrandStaircase", "INTERACT_Research", "INTERACT_ResearchCentres",
             "INTERACT_Research_Table", "INTERACT_VITTBI", "INTERACT_Achievements",
@@ -656,24 +949,45 @@
             museuEl.sceneEl.appendChild(hit);
           });
 
-          // 3. 3D Illuminated Tour Stop Markers
+          // 2B. Wire 3D School Back Wall Hitbox Click Handlers
+          const schoolBindings = [
+            { id: "SMEC", exhibitId: "school-smec" },
+            { id: "SCOPE", exhibitId: "school-scope" },
+            { id: "SCHOOLS_WALL", exhibitId: "exhibit-schools-wall" },
+            { id: "SENSE", exhibitId: "school-sense" },
+            { id: "SELECT", exhibitId: "school-select" },
+            { id: "INTERDISCIPLINARY", exhibitId: "school-interdisciplinary" }
+          ];
+          schoolBindings.forEach(({ id, exhibitId }) => {
+            const el = document.querySelector(`[data-art="${id}"]`);
+            if (el) {
+              el.addEventListener("click", (e) => {
+                e.stopPropagation?.();
+                e.preventDefault?.();
+                window.VirtuMuseum?.openExhibitById?.(exhibitId);
+              });
+            }
+          });
+
+          // 3. 3D Illuminated Tour Stop Markers (17 curated stops)
           const tourStopCoords = [
             { order: 1, name: "TOUR_01_Welcome", pos: [0.0, 0.02, 14.5] },
             { order: 2, name: "TOUR_02_Origins", pos: [-14.0, 0.02, -12.0] },
             { order: 3, name: "TOUR_03_Founder", pos: [-14.0, 0.02, -9.0] },
             { order: 4, name: "TOUR_04_Academics", pos: [-14.0, 0.02, -1.0] },
-            { order: 5, name: "TOUR_05_Schools", pos: [14.0, 0.02, -11.0] },
+            { order: 5, name: "TOUR_05_SchoolsBackWall", pos: [0.0, 0.02, -11.5] },
             { order: 6, name: "TOUR_06_FFCS", pos: [14.0, 0.02, -4.0] },
             { order: 7, name: "TOUR_07_CampusModel", pos: [0.0, 0.02, 6.5] },
             { order: 8, name: "TOUR_08_CentralMonument", pos: [0.0, 0.02, 1.5] },
             { order: 9, name: "TOUR_09_Staircase", pos: [8.5, 0.02, 9.0] },
-            { order: 10, name: "TOUR_10_Research", pos: [-13.0, 5.02, -3.0] },
-            { order: 11, name: "TOUR_11_ResearchTable", pos: [-11.0, 5.02, -6.5] },
-            { order: 12, name: "TOUR_12_Achievements", pos: [8.0, 5.02, -12.0] },
-            { order: 13, name: "TOUR_13_Global", pos: [0.0, 5.02, 6.5] },
-            { order: 14, name: "TOUR_14_StudentLife", pos: [13.0, 5.02, -6.0] },
-            { order: 15, name: "TOUR_15_TechnicalCulture", pos: [13.0, 5.02, 2.0] },
-            { order: 16, name: "TOUR_16_Finale", pos: [0.0, 5.02, 1.0] }
+            { order: 10, name: "TOUR_10_StairLanding", pos: [12.5, 5.02, 13.5] },
+            { order: 11, name: "TOUR_11_Research", pos: [-13.0, 5.02, -3.0] },
+            { order: 12, name: "TOUR_12_ResearchTable", pos: [-11.0, 5.02, -6.5] },
+            { order: 13, name: "TOUR_13_Achievements", pos: [8.0, 5.02, -12.0] },
+            { order: 14, name: "TOUR_14_Global", pos: [0.0, 5.02, 6.5] },
+            { order: 15, name: "TOUR_15_StudentLife", pos: [13.0, 5.02, -6.0] },
+            { order: 16, name: "TOUR_16_TechnicalCulture", pos: [13.0, 5.02, 2.0] },
+            { order: 17, name: "TOUR_17_Finale", pos: [0.0, 5.02, 1.0] }
           ];
 
           tourStopCoords.forEach((ts) => {
@@ -698,6 +1012,13 @@
       <script
         type="module"
         src="src/js/app.js"
+        crossorigin="anonymous"
+        data-cfasync="false"
+      ></script>
+
+      <!-- UI/UX CHANGE: UI Enhancements Script (loading screen, haptics, bottom toolbar, toasts) -->
+      <script
+        src="src/js/ui-enhancements.js"
         crossorigin="anonymous"
         data-cfasync="false"
       ></script>

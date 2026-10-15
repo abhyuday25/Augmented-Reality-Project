@@ -640,11 +640,13 @@ function getTwoFloorPosition(pos) {
   let z = clamp(pos.z, -16.2, 16.2);
   let y = pos.y || 0;
 
-  // 1. Staircase traversal zone: x in [10.5, 14.5], z in [6.8, 14.8]
-  const inStairs = x >= 10.5 && x <= 14.5 && z >= 6.8 && z <= 14.8;
+  // 1. Staircase traversal zone: comfortable width x in [10.2, 14.8], z in [6.6, 14.8]
+  const inStairs = x >= 10.2 && x <= 14.8 && z >= 6.6 && z <= 14.8;
   if (inStairs) {
+    // Continuous smoothstep S-curve (3t^2 - 2t^3) for seamless height transition
     const t = clamp((z - 6.8) / (14.5 - 6.8), 0, 1);
-    y = t * 5.0;
+    const smoothT = t * t * (3 - 2 * t);
+    y = smoothT * 5.0;
   } else if (y >= 2.5) {
     // Floor 2 Mezzanine level
     y = 5.0;
@@ -2203,6 +2205,10 @@ function setupUI() {
     setMapModalOpen(false);
     $("#rig")?.setAttribute("position", "14.000 0.000 -6.000");
   });
+  $("#mapZoneSchoolsF1")?.addEventListener("click", () => {
+    setMapModalOpen(false);
+    $("#rig")?.setAttribute("position", "0.000 0.000 -11.500");
+  });
   $("#mapZoneAtrium")?.addEventListener("click", () => {
     setMapModalOpen(false);
     $("#rig")?.setAttribute("position", "0.000 0.000 0.000");
@@ -2563,21 +2569,21 @@ function setupUI() {
       t.includes("comecar")
     ) {
       enterExperience("tour");
-    } else if (t.includes("pause") || t.includes("pausar")) tourC.pause();
+    } else if (t.includes("pause") || t.includes("pausar")) tourC?.pause?.();
     else if (
       t.includes("resume") ||
       t.includes("continue") ||
       t.includes("retomar") ||
       t.includes("continuar")
     )
-      tourC.resume();
+      tourC?.resume?.();
     else if (
       t.includes("stop") ||
       t.includes("end") ||
       t.includes("parar") ||
       t.includes("sair")
     )
-      tourC.stop();
+      tourC?.stop?.();
     else if (
       t.includes("explore") ||
       t.includes("free") ||
@@ -2604,14 +2610,14 @@ function setupUI() {
       t.includes("proxima") ||
       t.includes("seguinte")
     )
-      tourC.next();
+      tourC?.next?.();
     else if (
       t.includes("previous") ||
       t.includes("prev") ||
       t.includes("anterior") ||
       t.includes("antes")
     )
-      tourC.prev();
+      tourC?.prev?.();
     else if (
       t.includes("image on") ||
       t.includes("show image") ||
@@ -2764,19 +2770,19 @@ function setupUI() {
         if (key === "ArrowRight") {
           e.preventDefault();
           e.stopPropagation();
-          tourC.next();
+          tourC?.next?.();
           return;
         }
         if (key === "ArrowLeft") {
           e.preventDefault();
           e.stopPropagation();
-          tourC.prev();
+          tourC?.prev?.();
           return;
         }
       }
 
       if (
-        tourC.running &&
+        tourC?.running &&
         (e.key === "ArrowLeft" ||
           e.key === "ArrowRight" ||
           e.key === "ArrowUp" ||
@@ -2805,7 +2811,7 @@ function setupUI() {
         setMapModalOpen(false);
         setCampusModalOpen(false);
         setResearchModalOpen(false);
-        if (tourC.running) tourC.stop();
+        if (tourC?.running) tourC?.stop?.();
       }
 
       if (e.key === "Enter") {
@@ -2814,24 +2820,24 @@ function setupUI() {
         enterExperience("tour");
       }
       if (e.key === " " || e.code === "Space") {
-        if (tourC.running && !tourC.paused) tourC.pause();
-        else if (tourC.running && tourC.paused) tourC.resume();
+        if (tourC?.running && !tourC?.paused) tourC?.pause?.();
+        else if (tourC?.running && tourC?.paused) tourC?.resume?.();
       }
-      if (e.key === "n" || e.key === "N") tourC.next();
+      if (e.key === "n" || e.key === "N") tourC?.next?.();
 
       if (tourC) {
-        if (e.key === "ArrowRight") tourC.next();
-        if (e.key === "ArrowLeft") tourC.prev();
+        if (e.key === "ArrowRight") tourC.next?.();
+        if (e.key === "ArrowLeft") tourC.prev?.();
       }
 
-      if (e.key === "q" || e.key === "Q") tourC.prev();
+      if (e.key === "q" || e.key === "Q") tourC?.prev?.();
       if (e.key === "e" || e.key === "E") {
         // In free explore or tour, interact with closest exhibit or advance tour
         const drawerOpen = $("#exhibitDrawer")?.classList.contains("is-open");
         if (drawerOpen) {
           closeExhibitDrawer();
-        } else if (tourC.running) {
-          tourC.next();
+        } else if (tourC?.running) {
+          tourC.next?.();
         } else {
           // Open exhibit based on current section
           const rig = $("#rig");
@@ -3084,8 +3090,9 @@ function updateHudFloorAndSection(pos) {
     floorNumEl.textContent = "FLOOR 1";
     if (z > 7.0 && x >= 9.5) floorNameEl.textContent = "GRAND STAIRCASE";
     else if (z > 7.0) floorNameEl.textContent = "WELCOME LOBBY";
+    else if (z < -8.0) floorNameEl.textContent = "SCHOOLS OF EXCELLENCE";
     else if (x <= -6.0) floorNameEl.textContent = "ORIGINS & EVOLUTION";
-    else if (x >= 6.0) floorNameEl.textContent = "ACADEMICS & SCHOOLS";
+    else if (x >= 6.0) floorNameEl.textContent = "ACADEMICS & FFCS";
     else floorNameEl.textContent = "CENTRAL MONUMENT & MODEL";
   }
 
@@ -3348,15 +3355,44 @@ function switchFloor(targetFloor) {
   const currFloor = p.y >= 2.5 ? 2 : 1;
   const nextFloor = targetFloor ? targetFloor : currFloor === 1 ? 2 : 1;
 
-  if (nextFloor === 2) {
-    rig.object3D.position.set(12.5, 5.0, 14.0);
-    rig.setAttribute("position", "12.500 5.000 14.000");
-    showToast("Floor 2: Innovation & Impact");
-  } else {
-    rig.object3D.position.set(12.5, 0.0, 7.5);
-    rig.setAttribute("position", "12.500 0.000 7.500");
-    showToast("Floor 1: The VIT Journey");
+  try {
+    window.AudioFeedback?.floorSwitch?.();
+  } catch {}
+
+  const startPos = { x: p.x, y: p.y, z: p.z };
+  const targetPos = nextFloor === 2
+    ? { x: 12.5, y: 5.0, z: 13.5 }
+    : { x: 12.5, y: 0.0, z: 7.5 };
+
+  // Smooth elevation glide
+  const startTime = performance.now();
+  const duration = 850;
+
+  function animateFloorGlide(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(1.0, elapsed / duration);
+    // Smooth easeInOutCubic
+    const ease = progress < 0.5
+      ? 4 * progress * progress * progress
+      : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+    const curX = startPos.x + (targetPos.x - startPos.x) * ease;
+    const curY = startPos.y + (targetPos.y - startPos.y) * ease;
+    const curZ = startPos.z + (targetPos.z - startPos.z) * ease;
+
+    rig.object3D.position.set(curX, curY, curZ);
+    rig.setAttribute("position", `${curX.toFixed(3)} ${curY.toFixed(3)} ${curZ.toFixed(3)}`);
+
+    if (progress < 1.0) {
+      requestAnimationFrame(animateFloorGlide);
+    } else {
+      rig.object3D.position.set(targetPos.x, targetPos.y, targetPos.z);
+      rig.setAttribute("position", `${targetPos.x.toFixed(3)} ${targetPos.y.toFixed(3)} ${targetPos.z.toFixed(3)}`);
+      showToast(nextFloor === 2 ? "Floor 2: Innovation & Impact" : "Floor 1: The VIT Journey");
+    }
   }
+
+  requestAnimationFrame(animateFloorGlide);
 }
 
 // Interactive Map Controller
