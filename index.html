@@ -66,11 +66,18 @@
       crossorigin="anonymous"
       data-cfasync="false"
     ></script>
+    <!-- Modern 3D Libraries: GSAP Animation & Lucide Vector Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <link rel="modulepreload" href="src/js/app.js" crossorigin="anonymous" />
-    <link rel="stylesheet" href="src/css/style.css?v=2" />
+    <link rel="stylesheet" href="src/css/style.css?v=3" />
   </head>
 
   <body>
+    <!-- Cinematic Vignette & Dynamic Atmosphere Layer -->
+    <div class="cinematicVignette"></div>
+
     <!-- UI/UX CHANGE: 1. LOADING EXPERIENCE — Branded Splash Screen with Animated Progress Bar -->
     <div id="splashScreen" class="splashScreen" aria-label="Loading Virtual Museum">
       <div class="splashScreen__glow"></div>
@@ -1019,6 +1026,13 @@
       <!-- UI/UX CHANGE: UI Enhancements Script (loading screen, haptics, bottom toolbar, toasts) -->
       <script
         src="src/js/ui-enhancements.js"
+        crossorigin="anonymous"
+        data-cfasync="false"
+      ></script>
+
+      <!-- MODERN 3D EXPERIENCE: Tone Mapping, GSAP Camera Choreography, Spatial Radar Hotspots -->
+      <script
+        src="src/js/modern-experience.js"
         crossorigin="anonymous"
         data-cfasync="false"
       ></script>
