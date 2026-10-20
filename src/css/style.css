@@ -882,18 +882,19 @@ button.primary:hover {
 .exhibitDrawer {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
+  right: auto;
   bottom: 0;
-  width: min(460px, 94vw);
-  z-index: 30;
+  width: min(450px, calc(50vw - 24px));
+  z-index: 39;
   background: var(--bg-glass-card);
-  border-left: 1px solid var(--border-glass);
-  box-shadow: -20px 0 70px rgba(0, 0, 0, 0.8), var(--shadow-glow);
+  border-right: 1px solid var(--border-glass);
+  box-shadow: 20px 0 70px rgba(0, 0, 0, 0.8), var(--shadow-glow);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
   display: flex;
   flex-direction: column;
-  transform: translateX(105%);
+  transform: translateX(-105%);
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: auto;
 }
@@ -1088,9 +1089,12 @@ button.primary:hover {
   .exhibitDrawer {
     width: 100vw;
     top: auto;
+    left: 0;
+    right: 0;
     bottom: 0;
     height: 82vh;
     border-left: none;
+    border-right: none;
     border-top: 1px solid var(--border-glass);
     transform: translateY(105%);
   }
@@ -1106,7 +1110,7 @@ button.primary:hover {
   position: fixed;
   right: calc(24px + env(safe-area-inset-right));
   bottom: calc(90px + env(safe-area-inset-bottom));
-  width: 440px;
+  width: min(440px, calc(50vw - 36px));
   max-width: calc(100vw - 48px);
   max-height: calc(100vh - 140px);
   z-index: 38;
