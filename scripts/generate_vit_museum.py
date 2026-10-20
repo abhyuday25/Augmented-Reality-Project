@@ -556,25 +556,69 @@ def create_screen_texture(screen_title, subtitle, bullets, filename="tex_screen.
     img.save(path)
     return path
 
-def create_campus_model_map_texture(filename="tex_campus_map.png", size=(1024, 1024)):
-    img = Image.new("RGBA", size, color=(35, 45, 40, 255))
-    draw = ImageDraw.Draw(img)
-    draw.rectangle([40, 40, size[0]-40, size[1]-40], fill=(45, 80, 55))
-    road_col = (100, 105, 115)
-    draw.ellipse([100, 100, size[0]-100, size[1]-100], outline=road_col, width=32)
-    draw.line([(size[0]//2, 100), (size[0]//2, size[1]-100)], fill=road_col, width=28)
-    draw.line([(100, size[1]//2), (size[0]-100, size[1]//2)], fill=road_col, width=28)
-    bldgs = [
-        (size[0]//2 - 120, 200, 240, 120, "TECHNOLOGY TOWER (TT)", (20, 40, 80)),
-        (size[0]//2 - 130, size[1] - 340, 260, 140, "SILVER JUBILEE TOWER (SJT)", (25, 45, 90)),
-        (180, size[1]//2 - 70, 150, 140, "MAIN BUILDING (MB)", (30, 50, 95)),
-        (size[0] - 330, size[1]//2 - 70, 150, 140, "ANNA AUDITORIUM", (120, 60, 30)),
+def create_campus_model_map_texture(filename="tex_campus_map.png", size=(2048, 1536)):
+    canvas = Image.new("RGBA", size, color=(10, 20, 40, 255))
+    draw = ImageDraw.Draw(canvas)
+
+    # 1. Outer decorative architectural border
+    draw.rectangle([12, 12, size[0] - 12, size[1] - 12], outline=(212, 175, 55), width=4)
+    draw.rectangle([24, 24, size[0] - 24, size[1] - 24], outline=(59, 130, 246), width=2)
+
+    # 2. Top Title Header
+    header_h = 100
+    draw.rectangle([26, 26, size[0] - 26, 26 + header_h], fill=(15, 30, 65, 255))
+    draw.line([(26, 26 + header_h), (size[0] - 26, 26 + header_h)], fill=(212, 175, 55), width=3)
+    draw.text((size[0] // 2, 55), "VIT VELLORE — 372-ACRE CAMPUS MASTER PLAN & ACADEMIC ZONES",
+              font=get_font(38, bold=True), fill=(255, 255, 255), anchor="mm")
+    draw.text((size[0] // 2, 95), "Interactive Architectural Diorama • Technology Tower • SJT • Central Library • Administration",
+              font=get_font(20, bold=False), fill=(212, 175, 55), anchor="mm")
+
+    # 3. Main Center: Overhead Aerial Image
+    margin_top = 140
+    margin_bottom = 40
+    card_w = 340
+    main_x1 = 30 + card_w + 20
+    main_x2 = size[0] - 30 - card_w - 20
+    main_w = main_x2 - main_x1
+    main_h = size[1] - margin_top - margin_bottom
+
+    aerial_path = os.path.join(VIT_IMG_DIR, "vit_campus_aerial.jpg")
+    if os.path.exists(aerial_path):
+        with Image.open(aerial_path) as aerial:
+            resized = aerial.resize((main_w, main_h), Image.Resampling.LANCZOS)
+            canvas.paste(resized, (main_x1, margin_top))
+
+    draw.rectangle([main_x1, margin_top, main_x2, margin_top + main_h], outline=(212, 175, 55), width=3)
+
+    # 4. Inset Photo Cards of Key Blocks
+    cards = [
+        ("Technology Tower (TT)", "Computing & Engg", os.path.join(VIT_IMG_DIR, "vit_technology_tower.jpg"), 30, margin_top, card_w, (main_h - 20) // 2),
+        ("Silver Jubilee Tower", "Research & PG Complex", os.path.join(VIT_IMG_DIR, "vit_sjt_academic.jpg"), 30, margin_top + (main_h - 20) // 2 + 20, card_w, (main_h - 20) // 2),
+        ("Dr. M.G.R. Central Block", "Main Administration", os.path.join(VIT_IMG_DIR, "vit_admin_building.jpg"), size[0] - 30 - card_w, margin_top, card_w, (main_h - 20) // 2),
+        ("Periyar Central Library", "Resource & Digital Center", os.path.join(VIT_IMG_DIR, "vit_library.jpg"), size[0] - 30 - card_w, margin_top + (main_h - 20) // 2 + 20, card_w, (main_h - 20) // 2),
     ]
-    for bx, by, bw, bh, name, col in bldgs:
-        draw.rectangle([bx, by, bx+bw, by+bh], fill=col, outline=(212, 175, 55), width=3)
-        draw.text((bx + bw//2, by + bh//2), name, font=get_font(18, bold=True), fill=(255, 255, 255), anchor="mm")
+
+    for title, subtitle, img_p, cx, cy, cw, ch in cards:
+        draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=12, fill=(14, 25, 50, 255), outline=(212, 175, 55), width=2)
+        img_h = ch - 65
+        if os.path.exists(img_p):
+            with Image.open(img_p) as c_img:
+                c_resized = c_img.resize((cw - 12, img_h - 10), Image.Resampling.LANCZOS)
+                canvas.paste(c_resized, (cx + 6, cy + 6))
+        draw.rectangle([cx + 6, cy + 6, cx + cw - 6, cy + img_h - 4], outline=(70, 95, 140), width=1)
+        draw.text((cx + cw // 2, cy + ch - 42), title, font=get_font(20, bold=True), fill=(255, 255, 255), anchor="mm")
+        draw.text((cx + cw // 2, cy + ch - 18), subtitle, font=get_font(15), fill=(212, 175, 55), anchor="mm")
+
+    # Compass Rose in main aerial area
+    compass_x = main_x2 - 70
+    compass_y = margin_top + 70
+    draw.ellipse([compass_x - 40, compass_y - 40, compass_x + 40, compass_y + 40], fill=(10, 20, 40, 200), outline=(212, 175, 55), width=2)
+    draw.polygon([(compass_x, compass_y - 32), (compass_x + 8, compass_y), (compass_x - 8, compass_y)], fill=(239, 68, 68))
+    draw.polygon([(compass_x, compass_y + 32), (compass_x + 8, compass_y), (compass_x - 8, compass_y)], fill=(255, 255, 255))
+    draw.text((compass_x, compass_y - 36), "N", font=get_font(14, bold=True), fill=(239, 68, 68), anchor="mb")
+
     path = os.path.join(TEXTURES_DIR, filename)
-    img.save(path)
+    canvas.save(path)
     return path
 
 
@@ -791,6 +835,30 @@ def create_sphere(radius=1.0, subdivisions=2, center=(0,0,0)):
     mesh = trimesh.creation.icosphere(subdivisions=subdivisions, radius=radius)
     mesh.apply_translation(center)
     return mesh
+
+def create_leaf_frond(width=0.35, length=0.55, arch=0.06):
+    hw = width / 2.0
+    v = np.array([
+        [-hw * 0.3, 0.0, 0.0],
+        [ hw * 0.3, 0.0, 0.0],
+        [ hw, arch, length * 0.5],
+        [-hw, arch, length * 0.5],
+        [ 0.0, arch * 0.2, length],
+    ], dtype=np.float32)
+    f = np.array([
+        [0, 1, 2],
+        [0, 2, 3],
+        [3, 2, 4]
+    ], dtype=np.uint32)
+    uv = np.array([
+        [0.15, 0.05],
+        [0.85, 0.05],
+        [0.95, 0.65],
+        [0.05, 0.65],
+        [0.5, 0.98]
+    ], dtype=np.float32)
+    mesh = trimesh.Trimesh(vertices=v, faces=f, process=True)
+    return v, f.flatten(), mesh.vertex_normals, uv
 
 def create_vertical_panel_plane(width, height, center=(0,0,0), normal=(0,0,1)):
     hw = width / 2.0
@@ -1048,6 +1116,17 @@ mat_scr_ach = builder.get_or_create_material("Mat_Screen_Ach", roughness=0.2, em
 mat_scr_stu = builder.get_or_create_material("Mat_Screen_Stu", roughness=0.2, emissive_color=(0.1, 0.15, 0.25), texture_path=tex_screen_stu)
 mat_campus_map = builder.get_or_create_material("Mat_Campus_Map", roughness=0.4, metallic=0.05, texture_path=tex_campus_map)
 
+# Botanical Foliage Material
+tex_botanical_foliage = os.path.join(VIT_IMG_DIR, "botanical_foliage.jpg")
+mat_botanical_leaves = builder.get_or_create_material("Mat_Botanical_Leaves", roughness=0.35, metallic=0.05, texture_path=tex_botanical_foliage, double_sided=True)
+
+# Campus Miniature Landmark Stands Materials
+mat_mini_tt = builder.get_or_create_material("Mat_Mini_TT", roughness=0.25, metallic=0.1, texture_path=os.path.join(VIT_IMG_DIR, "vit_technology_tower.jpg"), double_sided=True)
+mat_mini_sjt = builder.get_or_create_material("Mat_Mini_SJT", roughness=0.25, metallic=0.1, texture_path=os.path.join(VIT_IMG_DIR, "vit_sjt_academic.jpg"), double_sided=True)
+mat_mini_mb = builder.get_or_create_material("Mat_Mini_MB", roughness=0.25, metallic=0.1, texture_path=os.path.join(VIT_IMG_DIR, "vit_admin_building.jpg"), double_sided=True)
+mat_mini_lib = builder.get_or_create_material("Mat_Mini_Lib", roughness=0.25, metallic=0.1, texture_path=os.path.join(VIT_IMG_DIR, "vit_library.jpg"), double_sided=True)
+mat_mini_gate = builder.get_or_create_material("Mat_Mini_Gate", roughness=0.25, metallic=0.1, texture_path=os.path.join(VIT_IMG_DIR, "vit_main_gate.jpg"), double_sided=True)
+
 root_children = []
 
 # ----------------- 1. EXTERIOR & FAÇADE (Floor 1 Entrance) -----------------
@@ -1263,12 +1342,73 @@ f1_prims.append(builder.add_mesh_primitive(m_desk_main.vertices, m_desk_main.fac
 f1_prims.append(builder.add_mesh_primitive(m_desk_top.vertices, m_desk_top.faces.flatten(), m_desk_top.vertex_normals, material_idx=mat_interior_walls))
 f1_prims.append(builder.add_mesh_primitive(m_desk_trim.vertices, m_desk_trim.faces.flatten(), m_desk_trim.vertex_normals, material_idx=mat_gold_trim))
 
-for pot_pos in [(-8.5, 17.0), (8.5, 17.0), (-8.5, 11.5), (8.5, 11.5)]:
-    px, pz = pot_pos
-    m_pot = create_cylinder(0.4, 0.8, sections=16, center=(px, 0.4, pz))
-    m_plant = create_sphere(radius=0.55, center=(px, 1.0, pz))
-    f1_prims.append(builder.add_mesh_primitive(m_pot.vertices, m_pot.faces.flatten(), m_pot.vertex_normals, material_idx=mat_pot_ceramic))
-    f1_prims.append(builder.add_mesh_primitive(m_plant.vertices, m_plant.faces.flatten(), m_plant.vertex_normals, material_idx=mat_foliage))
+def add_botanical_potted_plant(prims, px, pz, y_base=0.0):
+    m_pot = trimesh.creation.cylinder(radius=0.36, height=0.72, sections=20)
+    m_pot.apply_translation([px, y_base + 0.36, pz])
+    prims.append(builder.add_mesh_primitive(m_pot.vertices, m_pot.faces.flatten(), m_pot.vertex_normals, material_idx=mat_pot_ceramic))
+
+    m_rim = trimesh.creation.cylinder(radius=0.39, height=0.05, sections=20)
+    m_rim.apply_translation([px, y_base + 0.70, pz])
+    prims.append(builder.add_mesh_primitive(m_rim.vertices, m_rim.faces.flatten(), m_rim.vertex_normals, material_idx=mat_gold_trim))
+
+    m_soil = trimesh.creation.cylinder(radius=0.35, height=0.03, sections=16)
+    m_soil.apply_translation([px, y_base + 0.69, pz])
+    prims.append(builder.add_mesh_primitive(m_soil.vertices, m_soil.faces.flatten(), m_soil.vertex_normals, material_idx=mat_dark_metal))
+
+    m_stem = trimesh.creation.cylinder(radius=0.025, height=0.85, sections=12)
+    m_stem.apply_translation([px, y_base + 1.05, pz])
+    prims.append(builder.add_mesh_primitive(m_stem.vertices, m_stem.faces.flatten(), m_stem.vertex_normals, material_idx=mat_walnut_wood))
+
+    leaf_verts_all, leaf_ind_all, leaf_norm_all, leaf_uv_all = [], [], [], []
+    num_leaves = 14
+    for i in range(num_leaves):
+        tier = i // 5
+        if tier == 0:
+            pitch = math.radians(-32.0)
+            y_off = y_base + 0.76 + i * 0.03
+            l_len, l_w, rad = 0.58, 0.36, 0.14
+        elif tier == 1:
+            pitch = math.radians(-10.0)
+            y_off = y_base + 0.94 + (i - 5) * 0.04
+            l_len, l_w, rad = 0.52, 0.34, 0.12
+        else:
+            pitch = math.radians(28.0)
+            y_off = y_base + 1.15 + (i - 10) * 0.05
+            l_len, l_w, rad = 0.44, 0.30, 0.08
+
+        yaw = i * (2.0 * math.pi / num_leaves) + 0.15 * math.sin(i * 1.5)
+        roll = 0.12 * math.sin(i * 2.3)
+        lv, lf, ln, luv = create_leaf_frond(width=l_w, length=l_len, arch=0.06)
+
+        Rx = trimesh.transformations.rotation_matrix(pitch, [1, 0, 0])
+        Rz = trimesh.transformations.rotation_matrix(roll, [0, 0, 1])
+        Ry = trimesh.transformations.rotation_matrix(yaw, [0, 1, 0])
+        R = Ry @ Rz @ Rx
+
+        ox = px + rad * math.sin(yaw)
+        oz = pz + rad * math.cos(yaw)
+        T = trimesh.transformations.translation_matrix([ox, y_off, oz])
+        M = T @ R
+
+        v_h = np.hstack([lv, np.ones((len(lv), 1), dtype=np.float32)])
+        v_trans = (M @ v_h.T).T[:, :3]
+        n_h = np.hstack([ln, np.zeros((len(ln), 1), dtype=np.float32)])
+        n_trans = (R @ n_h.T).T[:, :3]
+
+        offset = len(leaf_verts_all)
+        leaf_verts_all.extend(v_trans)
+        leaf_ind_all.extend(lf + offset)
+        leaf_norm_all.extend(n_trans)
+        leaf_uv_all.extend(luv)
+
+    leaf_verts_all = np.array(leaf_verts_all, dtype=np.float32)
+    leaf_ind_all = np.array(leaf_ind_all, dtype=np.uint32)
+    leaf_norm_all = np.array(leaf_norm_all, dtype=np.float32)
+    leaf_uv_all = np.array(leaf_uv_all, dtype=np.float32)
+    prims.append(builder.add_mesh_primitive(leaf_verts_all, leaf_ind_all, leaf_norm_all, leaf_uv_all, material_idx=mat_botanical_leaves))
+
+for pot_pos in [(-8.5, 17.0), (8.5, 17.0), (-8.5, 11.5), (8.5, 11.5), (-6.5, 2.0), (6.5, 2.0)]:
+    add_botanical_potted_plant(f1_prims, pot_pos[0], pot_pos[1], y_base=0.0)
 
 for bx, bz in [(-7.5, 14.5), (0.0, 16.5), (-6.0, -7.0), (6.0, -7.0), (-6.0, 1.0), (6.0, 1.0)]:
     m_bseat = create_box((2.4, 0.12, 0.7), center=(bx, 0.45, bz))
@@ -1323,25 +1463,93 @@ node_sculpture = builder.create_node("Central_Landmark_Monument", sculpture_prim
 root_children.append(node_sculpture)
 root_children.append(builder.create_node("INTERACT_Central_Sculpture", translation=[0, 2.3, -2.0]))
 
-# Campus Miniature Model (Z = 4.2)
+# Campus Miniature Model & Masterplan Diorama (Z = 4.2)
 campus_prims = []
+# Base display table
 m_cbase = create_box((4.2, 0.85, 3.2), center=(0, 0.425, 4.2))
 m_ctrim = create_box((4.3, 0.08, 3.3), center=(0, 0.86, 4.2))
 campus_prims.append(builder.add_mesh_primitive(m_cbase.vertices, m_cbase.faces.flatten(), m_cbase.vertex_normals, material_idx=mat_navy_accent))
 campus_prims.append(builder.add_mesh_primitive(m_ctrim.vertices, m_ctrim.faces.flatten(), m_ctrim.vertex_normals, material_idx=mat_gold_trim))
 
+# High-Resolution Masterplan & Academic Blocks Surface Map (4.0m x 3.0m)
 map_v, map_i, map_n, map_uv = create_plane_with_uvs(4.0, 3.0, center=(0, 0.91, 4.2), horizontal=True)
 campus_prims.append(builder.add_mesh_primitive(map_v, map_i, map_n, map_uv, mat_campus_map))
 
-m_tt = create_box((0.8, 0.7, 0.5), center=(-0.8, 1.26, 3.5))
-m_sjt = create_box((0.9, 0.9, 0.5), center=(0.0, 1.36, 4.8))
-m_mb = create_box((0.6, 0.45, 0.6), center=(-1.2, 1.135, 4.4))
-m_anna = create_cylinder(0.4, 0.35, sections=16, center=(1.1, 1.085, 4.2))
-for bm in [m_tt, m_sjt, m_mb, m_anna]:
-    campus_prims.append(builder.add_mesh_primitive(bm.vertices, bm.faces.flatten(), bm.vertex_normals, material_idx=mat_interior_walls))
+# Open-Air Luxury Gallery Vitrine Frame (Zero foggy glass / depth-clipping artifacts)
+# 4 corner polished gold stanchions
+for cx in [-1.98, 1.98]:
+    for cz in [2.72, 5.68]:
+        m_cpost = create_cylinder(radius=0.024, height=0.86, sections=16, center=(cx, 1.32, cz))
+        campus_prims.append(builder.add_mesh_primitive(m_cpost.vertices, m_cpost.faces.flatten(), m_cpost.vertex_normals, material_idx=mat_gold_trim))
 
-m_gcase = create_box((4.1, 1.0, 3.1), center=(0, 1.41, 4.2))
-campus_prims.append(builder.add_mesh_primitive(m_gcase.vertices, m_gcase.faces.flatten(), m_gcase.vertex_normals, material_idx=mat_glass))
+# Polished gold top perimeter frame
+m_rail_n = create_box((3.96, 0.035, 0.035), center=(0, 1.74, 2.72))
+m_rail_s = create_box((3.96, 0.035, 0.035), center=(0, 1.74, 5.68))
+m_rail_w = create_box((0.035, 0.035, 2.96), center=(-1.98, 1.74, 4.2))
+m_rail_e = create_box((0.035, 0.035, 2.96), center=(1.98, 1.74, 4.2))
+for r in [m_rail_n, m_rail_s, m_rail_w, m_rail_e]:
+    campus_prims.append(builder.add_mesh_primitive(r.vertices, r.faces.flatten(), r.vertex_normals, material_idx=mat_gold_trim))
+
+# Warm gallery LED lighting strip under top frame
+m_led_strip = create_box((3.88, 0.015, 2.88), center=(0, 1.72, 4.2))
+campus_prims.append(builder.add_mesh_primitive(m_led_strip.vertices, m_led_strip.faces.flatten(), m_led_strip.vertex_normals, material_idx=mat_light_emissive))
+
+# 3D Architectural Landmark Miniature Models on Masterplan:
+# 1. Technology Tower (TT) Model
+m_tt_base = create_box((0.65, 0.62, 0.45), center=(-0.65, 1.22, 3.65))
+m_tt_glass = create_box((0.67, 0.52, 0.41), center=(-0.65, 1.22, 3.65))
+m_tt_crown = create_box((0.55, 0.08, 0.40), center=(-0.65, 1.57, 3.65))
+campus_prims.append(builder.add_mesh_primitive(m_tt_base.vertices, m_tt_base.faces.flatten(), m_tt_base.vertex_normals, material_idx=mat_navy_accent))
+campus_prims.append(builder.add_mesh_primitive(m_tt_glass.vertices, m_tt_glass.faces.flatten(), m_tt_glass.vertex_normals, material_idx=mat_dark_metal))
+campus_prims.append(builder.add_mesh_primitive(m_tt_crown.vertices, m_tt_crown.faces.flatten(), m_tt_crown.vertex_normals, material_idx=mat_gold_trim))
+
+# 2. Silver Jubilee Tower (SJT) Model
+m_sjt_base = create_box((0.68, 0.70, 0.45), center=(0.55, 1.26, 3.65))
+m_sjt_tier2 = create_box((0.48, 0.24, 0.35), center=(0.55, 1.68, 3.65))
+m_sjt_spire = create_cylinder(radius=0.018, height=0.18, sections=12, center=(0.55, 1.85, 3.65))
+campus_prims.append(builder.add_mesh_primitive(m_sjt_base.vertices, m_sjt_base.faces.flatten(), m_sjt_base.vertex_normals, material_idx=mat_exterior_stone))
+campus_prims.append(builder.add_mesh_primitive(m_sjt_tier2.vertices, m_sjt_tier2.faces.flatten(), m_sjt_tier2.vertex_normals, material_idx=mat_navy_accent))
+campus_prims.append(builder.add_mesh_primitive(m_sjt_spire.vertices, m_sjt_spire.faces.flatten(), m_sjt_spire.vertex_normals, material_idx=mat_gold_trim))
+
+# 3. Dr. M.G.R. Central Block (Main Building) Model
+m_mb_body = create_box((0.58, 0.30, 0.45), center=(-1.15, 1.06, 4.55))
+m_mb_portico = create_box((0.38, 0.34, 0.12), center=(-1.15, 1.08, 4.78))
+campus_prims.append(builder.add_mesh_primitive(m_mb_body.vertices, m_mb_body.faces.flatten(), m_mb_body.vertex_normals, material_idx=mat_exterior_stone))
+campus_prims.append(builder.add_mesh_primitive(m_mb_portico.vertices, m_mb_portico.faces.flatten(), m_mb_portico.vertex_normals, material_idx=mat_gold_trim))
+
+# 4. Periyar EVR Central Library Model
+m_lib_body = create_box((0.55, 0.26, 0.45), center=(1.15, 1.04, 4.55))
+m_lib_rotunda = create_cylinder(radius=0.16, height=0.34, sections=16, center=(1.15, 1.08, 4.55))
+campus_prims.append(builder.add_mesh_primitive(m_lib_body.vertices, m_lib_body.faces.flatten(), m_lib_body.vertex_normals, material_idx=mat_interior_walls))
+campus_prims.append(builder.add_mesh_primitive(m_lib_rotunda.vertices, m_lib_rotunda.faces.flatten(), m_lib_rotunda.vertex_normals, material_idx=mat_dark_metal))
+
+# 5. Anna Auditorium Model
+m_anna_cyl = create_cylinder(radius=0.26, height=0.25, sections=16, center=(1.20, 1.035, 3.55))
+m_anna_dome = create_cylinder(radius=0.20, height=0.06, sections=16, center=(1.20, 1.18, 3.55))
+campus_prims.append(builder.add_mesh_primitive(m_anna_cyl.vertices, m_anna_cyl.faces.flatten(), m_anna_cyl.vertex_normals, material_idx=mat_navy_accent))
+campus_prims.append(builder.add_mesh_primitive(m_anna_dome.vertices, m_anna_dome.faces.flatten(), m_anna_dome.vertex_normals, material_idx=mat_gold_trim))
+
+# 6. Iconic Main Entrance Gateway Model
+m_gate_p1 = create_box((0.08, 0.22, 0.08), center=(-0.25, 1.02, 5.30))
+m_gate_p2 = create_box((0.08, 0.22, 0.08), center=(0.25, 1.02, 5.30))
+m_gate_arch = create_box((0.62, 0.06, 0.10), center=(0.0, 1.15, 5.30))
+for g in [m_gate_p1, m_gate_p2, m_gate_arch]:
+    campus_prims.append(builder.add_mesh_primitive(g.vertices, g.faces.flatten(), g.vertex_normals, material_idx=mat_gold_trim))
+
+# Standing Photographic Landmark Plinths (Double-sided authentic photo displays):
+def add_landmark_photo_plinth(prims, px, pz, width, height, mat_idx):
+    # Brass base mount
+    m_base = create_box((width + 0.04, 0.02, 0.06), center=(px, 0.92, pz))
+    prims.append(builder.add_mesh_primitive(m_base.vertices, m_base.faces.flatten(), m_base.vertex_normals, material_idx=mat_gold_trim))
+    # Double-sided vertical photo panel
+    pv, pi, pn, puv = create_vertical_panel_plane(width, height, center=(px, 0.92 + height/2.0, pz), normal=(0, 0, 1))
+    prims.append(builder.add_mesh_primitive(pv, pi, pn, puv, mat_idx))
+
+add_landmark_photo_plinth(campus_prims, -0.65, 4.15, 0.42, 0.28, mat_mini_tt)
+add_landmark_photo_plinth(campus_prims, 0.55, 4.15, 0.42, 0.28, mat_mini_sjt)
+add_landmark_photo_plinth(campus_prims, -1.15, 4.95, 0.42, 0.28, mat_mini_mb)
+add_landmark_photo_plinth(campus_prims, 1.15, 4.95, 0.42, 0.28, mat_mini_lib)
+add_landmark_photo_plinth(campus_prims, 0.0, 5.48, 0.45, 0.24, mat_mini_gate)
 
 node_campus = builder.create_node("Campus_Miniature_Model", campus_prims)
 root_children.append(node_campus)
