@@ -222,7 +222,24 @@
   },
   {
     "order": 14,
-    "id": "tour-14-global",
+    "id": "tour-14-fests",
+    "floor": 2,
+    "pos": "-8.00 5.00 -12.00",
+    "rot": "0.00 0.00 0.00",
+    "targetPosition": [-8.0, 5.0, -12.0],
+    "targetLookAt": [-8.5, 7.5, -16.1],
+    "moveDur": 1600,
+    "lookDur": 700,
+    "wait": 1800,
+    "title": "VIT Mega Fests — Riviera & graVITas",
+    "subtitle": "Asia's Premier Cultural & Technical Carnivals",
+    "desc": "Riviera International Cultural Fest and graVITas Techno-Management Carnival featuring 30,000+ participants from 600+ colleges, celebrity proshows, robotics arenas, and 36-hour hackathons.",
+    "exhibitIds": ["wall-fests", "riviera-fest", "gravitas-fest"],
+    "waypointNotes": "Floor 2 North Wall of Mega Fests next to Wall of Achievements."
+  },
+  {
+    "order": 15,
+    "id": "tour-15-global",
     "floor": 2,
     "pos": "0.00 5.00 6.50",
     "rot": "0.00 180.00 0.00",
@@ -238,8 +255,8 @@
     "waypointNotes": "Floor 2 South Gallery central wall facing atrium."
   },
   {
-    "order": 15,
-    "id": "tour-15-student-life",
+    "order": 16,
+    "id": "tour-16-student-life",
     "floor": 2,
     "pos": "13.00 5.00 -6.00",
     "rot": "0.00 -90.00 0.00",
@@ -255,8 +272,8 @@
     "waypointNotes": "Floor 2 East Gallery student life photo gallery wall."
   },
   {
-    "order": 16,
-    "id": "tour-16-technical-culture",
+    "order": 17,
+    "id": "tour-17-technical-culture",
     "floor": 2,
     "pos": "13.00 5.00 2.00",
     "rot": "0.00 -90.00 0.00",
@@ -272,8 +289,8 @@
     "waypointNotes": "Floor 2 East Gallery technical events and student chapters display."
   },
   {
-    "order": 17,
-    "id": "tour-17-finale",
+    "order": 18,
+    "id": "tour-18-finale",
     "floor": 2,
     "pos": "0.00 5.00 1.00",
     "rot": "0.00 0.00 0.00",

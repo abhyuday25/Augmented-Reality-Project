@@ -10,6 +10,7 @@ const HOTSPOTS = [
   { id: 'staircase', name: 'Grand Staircase (Floor 2)', pos: [12.5, 2.2, 8.5], floor: 1, stopIdx: 8 },
   { id: 'research', name: 'Research & Innovation Wing', pos: [-18.0, 7.8, -4.0], floor: 2, stopIdx: 9 },
   { id: 'achievements', name: 'Wall of Achievements', pos: [8.5, 7.8, -16.0], floor: 2, stopIdx: 11 },
+  { id: 'fests', name: 'VIT Mega Fests (Riviera & graVITas)', pos: [-8.5, 7.8, -16.0], floor: 2, stopIdx: 13 },
   { id: 'student-life', name: 'Life at VIT & Motorsports', pos: [18.0, 7.8, -4.0], floor: 2, stopIdx: 13 },
 ];
 

@@ -55,6 +55,45 @@ def get_font(size, bold=False):
                 pass
     return ImageFont.load_default()
 
+def fit_and_crop(img_path, target_w, target_h, radius=10):
+    src = Image.open(img_path).convert("RGBA")
+    src_ratio = src.width / src.height
+    tgt_ratio = target_w / target_h
+    if src_ratio > tgt_ratio:
+        new_w = int(src.height * tgt_ratio)
+        offset = (src.width - new_w) // 2
+        src = src.crop((offset, 0, offset + new_w, src.height))
+    else:
+        new_h = int(src.width / tgt_ratio)
+        offset = (src.height - new_h) // 2
+        src = src.crop((0, offset, src.width, offset + new_h))
+    src = src.resize((target_w, target_h), Image.Resampling.LANCZOS)
+    
+    mask = Image.new("L", (target_w, target_h), 0)
+    mask_draw = ImageDraw.Draw(mask)
+    mask_draw.rounded_rectangle([0, 0, target_w, target_h], radius=radius, fill=255)
+    
+    output = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
+    output.paste(src, (0, 0), mask=mask)
+    return output
+
+def wrap_text(text, font, max_width, draw):
+    words = text.split()
+    lines = []
+    curr = []
+    for w in words:
+        test = " ".join(curr + [w])
+        bbox = draw.textbbox((0, 0), test, font=font)
+        if bbox[2] - bbox[0] <= max_width:
+            curr.append(w)
+        else:
+            if curr:
+                lines.append(" ".join(curr))
+            curr = [w]
+    if curr:
+        lines.append(" ".join(curr))
+    return lines
+
 def create_marble_floor_texture(filename="tex_marble_floor.png", size=(1024, 1024)):
     img = Image.new("RGB", size, color=(242, 243, 246))
     draw = ImageDraw.Draw(img)
@@ -516,26 +555,133 @@ def create_student_life_texture(filename="tex_student_life.png", size=(2048, 102
     draw.text((size[0]//2, 160), "Culture, Innovation, Sports & Campus Camaraderie", font=get_font(36, bold=False), fill=(212, 175, 55), anchor="mm")
     
     photo_cards = [
-        ("Riviera Cultural Fest", "Asia's Premier ISO 9001 Festival", (180, 40, 70)),
-        ("graVITas Tech Fest", "Hackathons & Autonomous Robotics", (30, 100, 170)),
-        ("Clubs & Student Chapters", "120+ Active Chapters (IEEE, ACM...)", (40, 130, 90)),
-        ("Formula Student Motorsports", "Team Praega & Ojas Race Cars", (170, 90, 20)),
-        ("Sports Complexes & Athletics", "Olympic swimming pool & stadiums", (90, 40, 150)),
-        ("Campus Life & Hostels", "Modern residential community", (50, 70, 120)),
+        ("Riviera Cultural Fest", "Asia's Premier ISO 9001 Festival", (180, 40, 70), os.path.join(DOWNLOAD_DIR, "ezgif-4-df3cbe0afd.webp")),
+        ("graVITas Tech Fest", "Hackathons & Autonomous Robotics", (30, 100, 170), os.path.join(DOWNLOAD_DIR, "ezgif-4-1012bff6bf.webp")),
+        ("Clubs & Student Chapters", "120+ Active Chapters (IEEE, ACM...)", (40, 130, 90), os.path.join(DOWNLOAD_DIR, "student-1024x576.webp")),
+        ("Formula Student Motorsports", "Team Praega & Ojas Race Cars", (170, 90, 20), os.path.join(DOWNLOAD_DIR, "formula_student_vit.jpg")),
+        ("Sports Complexes & Athletics", "Olympic swimming pool & stadiums", (90, 40, 150), os.path.join(DOWNLOAD_DIR, "ezgif-3-8294374392.webp")),
+        ("Campus Life & Hostels", "Modern residential community", (50, 70, 120), os.path.join(VIT_IMG_DIR, "vit_hostels.jpg")),
     ]
     cols, rows = 3, 2
     margin_x, margin_y = 50, 220
     pw = (size[0] - margin_x*2 - (cols-1)*30) // cols
     ph = (size[1] - margin_y - 50 - (rows-1)*30) // rows
-    for idx, (title, sub, col) in enumerate(photo_cards):
+    for idx, (title, sub, col, img_path) in enumerate(photo_cards):
         r, c = idx // cols, idx % cols
         px = margin_x + c * (pw + 30)
         py = margin_y + r * (ph + 30)
         draw.rounded_rectangle([px, py, px + pw, py + ph], radius=14, fill=(20, 32, 54), outline=(147, 197, 253), width=2)
-        draw.rounded_rectangle([px+8, py+8, px + pw-8, py + ph - 80], radius=10, fill=col)
-        draw.text((px + pw//2, py + (ph-80)//2), f"[ {title} ]", font=get_font(28, bold=True), fill=(255, 255, 255), anchor="mm")
-        draw.text((px + pw//2, py + ph - 50), title, font=get_font(26, bold=True), fill=(255, 255, 255), anchor="mm")
-        draw.text((px + pw//2, py + ph - 22), sub, font=get_font(18), fill=(212, 175, 55), anchor="mm")
+        
+        img_w = pw - 16
+        img_h = ph - 80
+        if os.path.exists(img_path):
+            cropped = fit_and_crop(img_path, img_w, img_h, radius=10)
+            img.paste(cropped, (px + 8, py + 8), mask=cropped)
+            draw.rounded_rectangle([px + 8, py + 8, px + 8 + img_w, py + 8 + img_h], radius=10, outline=(212, 175, 55), width=2)
+        else:
+            draw.rounded_rectangle([px+8, py+8, px + pw-8, py + ph - 80], radius=10, fill=col)
+            
+        draw.text((px + pw//2, py + ph - 48), title, font=get_font(25, bold=True), fill=(255, 255, 255), anchor="mm")
+        draw.text((px + pw//2, py + ph - 20), sub, font=get_font(18), fill=(212, 175, 55), anchor="mm")
+    path = os.path.join(TEXTURES_DIR, filename)
+    img.save(path)
+    return path
+
+def create_fests_wall_texture(filename="tex_fests_wall.png", size=(2048, 1024)):
+    img = Image.new("RGBA", size, color=(12, 22, 38, 255))
+    draw = ImageDraw.Draw(img)
+    
+    # Outer architectural borders matching Wall of Achievements
+    draw.rectangle([16, 16, size[0]-16, size[1]-16], outline=(59, 130, 246), width=6)
+    draw.rectangle([30, 30, size[0]-30, size[1]-30], outline=(212, 175, 55), width=2)
+    
+    # Header
+    draw.text((size[0]//2, 80), "VIT MEGA FESTS", font=get_font(76, bold=True), fill=(255, 255, 255), anchor="mm")
+    draw.text((size[0]//2, 145), "Riviera International Cultural Fest  |  graVITas Technical Carnival", font=get_font(32, bold=False), fill=(212, 175, 55), anchor="mm")
+    
+    # Dividing line in center
+    draw.line([(size[0]//2, 180), (size[0]//2, size[1]-60)], fill=(59, 130, 246, 160), width=2)
+    
+    # Panel bounds
+    panel_w = 930
+    panel_h = 750
+    py = 185
+    
+    # --- LEFT: RIVIERA ---
+    lx = 60
+    draw.rounded_rectangle([lx, py, lx + panel_w, py + panel_h], radius=16, fill=(16, 28, 50), outline=(212, 175, 55), width=2)
+    
+    # Top badge
+    draw.rounded_rectangle([lx + 20, py + 16, lx + 500, py + 52], radius=8, fill=(136, 19, 55))
+    draw.text((lx + 35, py + 34), "ASIA'S PREMIER ISO 9001:2015 CULTURAL FEST", font=get_font(18, bold=True), fill=(255, 255, 255), anchor="lm")
+    draw.text((lx + panel_w - 25, py + 34), "vit.ac.in/campuslife/fests", font=get_font(16), fill=(212, 175, 55), anchor="rm")
+    
+    draw.text((lx + 25, py + 85), "RIVIERA — International Cultural & Sports Fest", font=get_font(30, bold=True), fill=(255, 255, 255), anchor="lm")
+    
+    # Riviera Photo (from official vit.ac.in/campuslife/fests)
+    riv_img_path = os.path.join(DOWNLOAD_DIR, "ezgif-4-df3cbe0afd.webp")
+    if os.path.exists(riv_img_path):
+        riv_photo = fit_and_crop(riv_img_path, panel_w - 50, 360, radius=12)
+        img.paste(riv_photo, (lx + 25, py + 115), mask=riv_photo)
+        draw.rounded_rectangle([lx + 25, py + 115, lx + panel_w - 25, py + 115 + 360], radius=12, outline=(212, 175, 55), width=2)
+        
+    # Text from official site
+    riv_desc = "Riviera is VIT's flagship annual International Sports and Cultural Fest. The festival gives students a dynamic platform to showcase and shape talents across diverse technical, managerial, artistic, and athletic arenas. Spanning 4 days, Riviera hosts 30,000+ students from 600+ universities nationally and internationally, featuring star-studded celebrity proshows and over 100+ events."
+    lines = wrap_text(riv_desc, get_font(21), panel_w - 60, draw)
+    ty = py + 495
+    for l in lines[:4]:
+        draw.text((lx + 25, ty), l, font=get_font(21), fill=(226, 232, 240), anchor="lm")
+        ty += 32
+        
+    # Key Stat Badges
+    badges_riv = ["30,000+ Participants", "600+ Colleges", "100+ Events & Proshows", "4 Days Extravaganza"]
+    bx = lx + 25
+    by = py + panel_h - 45
+    for b in badges_riv:
+        bw = draw.textlength(b, font=get_font(17, bold=True)) + 24
+        draw.rounded_rectangle([bx, by - 16, bx + bw, by + 16], radius=6, fill=(30, 58, 110), outline=(212, 175, 55), width=1)
+        draw.text((bx + bw//2, by), b, font=get_font(17, bold=True), fill=(255, 255, 255), anchor="mm")
+        bx += bw + 12
+        
+    # --- RIGHT: GRAVITAS ---
+    rx = size[0]//2 + 30
+    draw.rounded_rectangle([rx, py, rx + panel_w, py + panel_h], radius=16, fill=(16, 28, 50), outline=(59, 130, 246), width=2)
+    
+    # Top badge
+    draw.rounded_rectangle([rx + 20, py + 16, rx + 490, py + 52], radius=8, fill=(15, 75, 125))
+    draw.text((rx + 35, py + 34), "ANNUAL TECHNOLOGICAL & DESIGN CARNIVAL", font=get_font(18, bold=True), fill=(255, 255, 255), anchor="lm")
+    draw.text((rx + panel_w - 25, py + 34), "gravitas.vit.ac.in", font=get_font(16), fill=(147, 197, 253), anchor="rm")
+    
+    draw.text((rx + 25, py + 85), "graVITas — Annual Technological Carnival", font=get_font(30, bold=True), fill=(255, 255, 255), anchor="lm")
+    
+    # graVITas Photo (from official vit.ac.in/campuslife/fests)
+    grav_img_path = os.path.join(DOWNLOAD_DIR, "ezgif-4-1012bff6bf.webp")
+    if os.path.exists(grav_img_path):
+        grav_photo = fit_and_crop(grav_img_path, panel_w - 50, 360, radius=12)
+        img.paste(grav_photo, (rx + 25, py + 115), mask=grav_photo)
+        draw.rounded_rectangle([rx + 25, py + 115, rx + panel_w - 25, py + 115 + 360], radius=12, outline=(59, 130, 246), width=2)
+        
+    # Text from official site
+    grav_desc = "graVITas is VIT University's annual technological and design carnival. The festival provides a vibrant platform for individuals to showcase engineering prowess and innovate in technology. Over 3 intense days, students from across India participate in competitive autonomous robotics combat, 36-hour hackathons, and aerospace workshops, promoting collective growth in national development."
+    lines = wrap_text(grav_desc, get_font(21), panel_w - 60, draw)
+    ty = py + 495
+    for l in lines[:4]:
+        draw.text((rx + 25, ty), l, font=get_font(21), fill=(226, 232, 240), anchor="lm")
+        ty += 32
+        
+    # Key Stat Badges
+    badges_grav = ["100+ Tech Events", "Autonomous Robotics", "36-Hour Hackathons", "Industry Sprints"]
+    bx = rx + 25
+    by = py + panel_h - 45
+    for b in badges_grav:
+        bw = draw.textlength(b, font=get_font(17, bold=True)) + 24
+        draw.rounded_rectangle([bx, by - 16, bx + bw, by + 16], radius=6, fill=(15, 60, 95), outline=(147, 197, 253), width=1)
+        draw.text((bx + bw//2, by), b, font=get_font(17, bold=True), fill=(255, 255, 255), anchor="mm")
+        bx += bw + 12
+        
+    # Bottom footnote
+    draw.text((size[0]//2, size[1] - 28), "Content and authentic imagery sourced from VIT Vellore Official Portal (vit.ac.in/campuslife/fests)", font=get_font(16), fill=(148, 163, 184), anchor="mm")
+    
     path = os.path.join(TEXTURES_DIR, filename)
     img.save(path)
     return path
@@ -1046,10 +1192,12 @@ a4 = create_infopanel_texture(
 )
 
 tex_achievements = create_achievements_wall_texture()
+tex_fests_wall = create_fests_wall_texture()
 tex_student_life = create_student_life_texture()
 tex_screen_hist = create_screen_texture("VIT History Archive", "Interactive Timeline", ["1984: Foundation Story & Heritage", "2001: University Milestone Videos", "2019: Institution of Eminence Ceremony", "Notable Chancellor Addresses"], "tex_scr_hist.png")
 tex_screen_res = create_screen_texture("Research & Innovation", "Live Research Metrics", ["50,000+ Scopus Indexed Papers", "Top Patent Filing Institute in India", "Funded Projects from DST, DRDO, ISRO", "Global Research Laboratories"], "tex_scr_res.png")
 tex_screen_ach = create_screen_texture("Wall of Fame", "Distinguished Honors", ["QS World University Rankings", "NIRF Top 15 University Category", "Smart India Hackathon Consecutive Champions", "Distinguished Alumni in Fortune 500"], "tex_scr_ach.png")
+tex_screen_fest = create_screen_texture("VIT Mega Fests", "Cultural & Tech Carnivals", ["Riviera: Asia's Premier ISO 9001 Cultural Fest", "graVITas: 3-Day Autonomous Tech & Robotics Carnival", "30,000+ Participants from 600+ Universities", "Annual Proshows & National 36h Hackathons"], "tex_scr_fest.png")
 tex_screen_stu = create_screen_texture("Campus Life & Events", "Student Experience", ["Riviera International Cultural Extravaganza", "graVITas Annual Tech Festival", "120+ Active Student Technical Chapters", "Inter-University Sports Champions"], "tex_scr_stu.png")
 tex_campus_map = create_campus_model_map_texture()
 tex_sculpture_front_logo = create_sculpture_front_logo_texture()
@@ -1108,11 +1256,13 @@ mat_panels_acad = [
 ]
 
 mat_achieve_wall = builder.get_or_create_material("Mat_Achievements_Wall", roughness=0.25, metallic=0.2, texture_path=tex_achievements)
+mat_fests_wall = builder.get_or_create_material("Mat_Fests_Wall", roughness=0.25, metallic=0.2, texture_path=tex_fests_wall)
 mat_student_wall = builder.get_or_create_material("Mat_Student_Life_Wall", roughness=0.25, metallic=0.1, texture_path=tex_student_life)
 
 mat_scr_hist = builder.get_or_create_material("Mat_Screen_Hist", roughness=0.2, emissive_color=(0.1, 0.15, 0.25), texture_path=tex_screen_hist)
 mat_scr_acad = builder.get_or_create_material("Mat_Screen_Acad", roughness=0.2, emissive_color=(0.1, 0.15, 0.25), texture_path=tex_screen_res)
 mat_scr_ach = builder.get_or_create_material("Mat_Screen_Ach", roughness=0.2, emissive_color=(0.1, 0.15, 0.25), texture_path=tex_screen_ach)
+mat_scr_fest = builder.get_or_create_material("Mat_Screen_Fest", roughness=0.2, emissive_color=(0.1, 0.15, 0.25), texture_path=tex_screen_fest)
 mat_scr_stu = builder.get_or_create_material("Mat_Screen_Stu", roughness=0.2, emissive_color=(0.1, 0.15, 0.25), texture_path=tex_screen_stu)
 mat_campus_map = builder.get_or_create_material("Mat_Campus_Map", roughness=0.4, metallic=0.05, texture_path=tex_campus_map)
 
@@ -1661,6 +1811,34 @@ ach_prims.append(builder.add_mesh_primitive(ach_scr_v, ach_scr_i, ach_scr_n, ach
 node_ach = builder.create_node("Floor02_Achievements_Section", ach_prims)
 root_children.append(node_ach)
 root_children.append(builder.create_node("INTERACT_Achievements", translation=[8.5, 7.5, -16.0]))
+
+# Floor 2 North Wall (West Wing): Mega Fests (Riviera & graVITas)
+fest_prims = []
+fc_v, fc_i, fc_n, fc_uv = create_vertical_panel_plane(14.0, 4.4, center=(-8.5, 7.4, -16.15), normal=(0, 0, 1))
+fest_prims.append(builder.add_mesh_primitive(fc_v, fc_i, fc_n, fc_uv, mat_fests_wall))
+
+for p_idx, px in enumerate([-13.0, -8.5, -4.0]):
+    m_pbase = create_box((1.2, 0.9, 1.0), center=(px, 5.45, -14.2))
+    m_ptrim = create_box((1.26, 0.06, 1.06), center=(px, 5.92, -14.2))
+    fest_prims.append(builder.add_mesh_primitive(m_pbase.vertices, m_pbase.faces.flatten(), m_pbase.vertex_normals, material_idx=mat_navy_accent))
+    fest_prims.append(builder.add_mesh_primitive(m_ptrim.vertices, m_ptrim.faces.flatten(), m_ptrim.vertex_normals, material_idx=mat_gold_trim))
+    
+    m_tbase = create_cylinder(0.18, 0.1, center=(px, 6.0, -14.2))
+    m_tcup = create_cylinder(0.22, 0.35, center=(px, 6.25, -14.2))
+    fest_prims.append(builder.add_mesh_primitive(m_tbase.vertices, m_tbase.faces.flatten(), m_tbase.vertex_normals, material_idx=mat_gold_trim))
+    fest_prims.append(builder.add_mesh_primitive(m_tcup.vertices, m_tcup.faces.flatten(), m_tcup.vertex_normals, material_idx=mat_gold_emissive))
+    
+    m_tg = create_box((1.1, 0.8, 0.9), center=(px, 6.35, -14.2))
+    fest_prims.append(builder.add_mesh_primitive(m_tg.vertices, m_tg.faces.flatten(), m_tg.vertex_normals, material_idx=mat_glass))
+
+fest_scr_v, fest_scr_i, fest_scr_n, fest_scr_uv = create_vertical_panel_plane(1.1, 0.8, center=(-1.8, 6.5, -14.5), normal=(0, 0, 1))
+fest_prims.append(builder.add_mesh_primitive(fest_scr_v, fest_scr_i, fest_scr_n, fest_scr_uv, mat_scr_fest))
+
+node_fests = builder.create_node("Floor02_MegaFests_Section", fest_prims)
+root_children.append(node_fests)
+root_children.append(builder.create_node("INTERACT_Fests_Wall", translation=[-8.5, 7.5, -16.0]))
+root_children.append(builder.create_node("INTERACT_Riviera_Wall", translation=[-12.0, 7.5, -16.0]))
+root_children.append(builder.create_node("INTERACT_graVITas_Wall", translation=[-5.0, 7.5, -16.0]))
 
 # Floor 2 South Wall: Global VIT (Dual-sided so text is correctly readable from both inside and outside)
 global_prims = []

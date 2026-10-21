@@ -25,6 +25,7 @@
       { id: "staircase", name: "Grand Staircase to Floor 2", pos: [12.5, 2.0, 8.5], floor: 1, stopIdx: 8, icon: "layers" },
       { id: "research", name: "Research & Innovation Wing", pos: [-18.0, 7.5, -4.0], floor: 2, stopIdx: 9, icon: "flask-conical" },
       { id: "achievements", name: "Wall of Achievements", pos: [8.5, 7.5, -16.0], floor: 2, stopIdx: 11, icon: "trophy" },
+      { id: "fests", name: "VIT Mega Fests (Riviera & graVITas)", pos: [-8.5, 7.5, -16.0], floor: 2, stopIdx: 13, icon: "sparkles" },
       { id: "student-life", name: "Life at VIT & Motorsports", pos: [18.0, 7.5, -4.0], floor: 2, stopIdx: 13, icon: "users" },
       { id: "global-vit", name: "Global VIT Partnerships", pos: [0.0, 7.5, 14.0], floor: 2, stopIdx: 12, icon: "globe" }
     ],

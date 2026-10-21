@@ -778,22 +778,51 @@
       "subtitle": "India's First ISO 9001:2015 Certified University Cultural Festival",
       "shortDescription": "Annual multi-day extravaganza attracting 30,000+ participants from across 600 colleges.",
       "description": "Riviera is VIT's flagship annual international sports and cultural carnival. Holding the distinction of being India's first ISO 9001:2015 certified college cultural festival, Riviera features 100+ events spanning dramatic arts, music, dance, debates, river marathons, and high-energy celebrity musical pro-shows in the outdoor stadium.",
-      "image": "src/assets/images/vit/vit_sjt_academic.jpg",
+      "image": "src/assets/images/vit/vit_riviera_fest.webp",
       "imageAlt": "Riviera Cultural Festival Celebrations",
       "year": "Annual Carnival (ISO 9001:2015)",
-      "location": "Floor 2 • East Gallery (Festivals Section)",
+      "location": "Floor 2 • East Gallery & North Wall",
       "facts": [
         "First ISO 9001:2015 certified university cultural and sports festival in India",
         "Over 30,000 student participants representing 600+ universities nationally and internationally",
-        "Features the Riviera Marathon advocating social causes and health awareness"
+        "Features star proshows (Sonu Nigam, Ayushmann Khurrana, Andrea Jeremiah) and Riviera Marathon"
       ],
       "sourceTitle": "Riviera Festival - Official VIT Overview",
-      "sourceUrl": "https://vit.ac.in/campus-life/events",
+      "sourceUrl": "https://vit.ac.in/campuslife/fests",
       "nodeName": "INTERACT_Riviera",
       "position": [
         18.1,
         7.5,
         -9
+      ]
+    },
+    {
+      "id": "wall-fests",
+      "tourStop": 14,
+      "floor": 2,
+      "section": "Mega Fests",
+      "code": "021b",
+      "title": "VIT Mega Fests — Riviera & graVITas",
+      "subtitle": "Asia's Premier Cultural Extravaganza & National Technical Carnival",
+      "shortDescription": "Honoring Riviera ISO 9001:2015 cultural carnival and graVITas techno-management festival.",
+      "description": "The Mega Fests exhibition on the second floor back wall celebrates VIT's landmark student carnivals: Riviera, India's first ISO 9001:2015 certified sports and cultural fest hosting 30,000+ students from 600+ universities with star proshows (Sonu Nigam, Ayushmann Khurrana, Andrea Jeremiah), and graVITas, the premier 3-day technological and design carnival fostering autonomous robotics, 36-hour hackathons, and youth engineering innovations.",
+      "image": "src/assets/images/vit/vit_riviera_dance.webp",
+      "imageAlt": "VIT Mega Fests - Riviera & graVITas",
+      "year": "Annual Student Carnivals",
+      "location": "Floor 2 • North Wall (Adjacent to Wall of Achievements)",
+      "facts": [
+        "Riviera is India's first ISO 9001:2015 certified university sports and cultural festival",
+        "Over 30,000 participants from 600+ universities across India and international delegations",
+        "graVITas brings 100+ tech competitions, autonomous robotics arenas, and 36-hour hackathons",
+        "Proshows host prominent national musicians, cinema celebrities, and sporting legends"
+      ],
+      "sourceTitle": "Campus Life & Fests - VIT Official",
+      "sourceUrl": "https://vit.ac.in/campuslife/fests",
+      "nodeName": "INTERACT_Fests_Wall",
+      "position": [
+        -8.5,
+        7.5,
+        -16.0
       ]
     },
     {
@@ -806,17 +835,17 @@
       "subtitle": "Where Engineering Ingenuity Meets High-Tech Hackathons",
       "shortDescription": "Premier technological festival featuring robotics arenas, codathons, and aerospace workshops.",
       "description": "graVITas is VIT Vellore's annual techno-management festival. Over three intense days, the campus transforms into a technological showcase with competitive robotics combat, 36-hour hackathons, autonomous vehicle design sprints, model rocket launches, and guest lectures from eminent international scientists and industry tech titans.",
-      "image": "src/assets/images/vit/vit_technology_tower.jpg",
+      "image": "src/assets/images/vit/vit_gravitas_fest.webp",
       "imageAlt": "graVITas Techno-Management Hackathons",
       "year": "Annual Tech Fest",
-      "location": "Floor 2 • East Gallery (Technical Culture)",
+      "location": "Floor 2 • East Gallery & North Wall",
       "facts": [
         "Over 100+ technical events, robotics tournaments, and multi-track hackathons",
         "Industry collaboration with Fortune 500 tech sponsors providing direct internships",
         "Flagship coding marathons drawing thousands of top programmers across the country"
       ],
       "sourceTitle": "graVITas Techno-Management Festival",
-      "sourceUrl": "https://vit.ac.in/campus-life/events",
+      "sourceUrl": "https://vit.ac.in/campuslife/fests",
       "nodeName": "INTERACT_graVITas",
       "position": [
         18.1,
@@ -1045,6 +1074,18 @@
     "INTERACT_StudentLife": {
       "type": "exhibit",
       "exhibitId": "student-life"
+    },
+    "INTERACT_Fests_Wall": {
+      "type": "exhibit",
+      "exhibitId": "wall-fests"
+    },
+    "INTERACT_Riviera_Wall": {
+      "type": "exhibit",
+      "exhibitId": "riviera-fest"
+    },
+    "INTERACT_graVITas_Wall": {
+      "type": "exhibit",
+      "exhibitId": "gravitas-fest"
     },
     "INTERACT_Riviera": {
       "type": "exhibit",
