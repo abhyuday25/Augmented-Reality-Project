@@ -2,6 +2,8 @@
 
 An immersive, cinema-grade 3D digital museum dedicated to **Vellore Institute of Technology (VIT), Vellore**. Built with **React 18**, **React Three Fiber (R3F)**, **Three.js PBR Shading**, **Drei**, **Postprocessing**, **Zustand**, and **Framer Motion**.
 
+This was made as a part of course project for the course **Augmented Reality and Virtual Reality(CSI4005)** and is a demo model.
+
 The experience allows visitors to explore two floors freely with WASD walking controls, follow a curated 16-stop guided tour, inspect authentic campus photographs, interact with 3D landmark beacons, and study verified university milestones.
 
 ---
