@@ -72,17 +72,17 @@ def create_marble_floor_texture(filename="tex_marble_floor.png", size=(1024, 102
     return path
 
 def create_floor2_texture(filename="tex_floor2.png", size=(1024, 1024)):
-    """Dark polished contemporary architectural stone for Floor 2."""
-    img = Image.new("RGB", size, color=(22, 28, 38))
+    """Matching bright polished marble floor for Floor 2."""
+    img = Image.new("RGB", size, color=(242, 243, 246))
     draw = ImageDraw.Draw(img)
     tile_size = 256
     for x in range(0, size[0], tile_size):
-        draw.line([(x, 0), (x, size[1])], fill=(38, 48, 64), width=2)
+        draw.line([(x, 0), (x, size[1])], fill=(215, 218, 224), width=3)
     for y in range(0, size[1], tile_size):
-        draw.line([(0, y), (size[0], y)], fill=(38, 48, 64), width=2)
+        draw.line([(0, y), (size[0], y)], fill=(215, 218, 224), width=3)
     
-    draw.rectangle([8, 8, size[0]-8, size[1]-8], outline=(212, 175, 55), width=3)
-    draw.rectangle([18, 18, size[0]-18, size[1]-18], outline=(59, 130, 246), width=1)
+    draw.rectangle([10, 10, size[0]-10, size[1]-10], outline=(180, 185, 195), width=4)
+    draw.rectangle([20, 20, size[0]-20, size[1]-20], outline=(30, 41, 59), width=2)
     
     path = os.path.join(TEXTURES_DIR, filename)
     img.save(path, quality=92)
@@ -1067,7 +1067,7 @@ builder = GLBBuilder()
 
 # Materials
 mat_floor1 = builder.get_or_create_material("Mat_Floor1_Marble", (0.96, 0.96, 0.97, 1.0), roughness=0.18, metallic=0.05, texture_path=tex_floor1)
-mat_floor2 = builder.get_or_create_material("Mat_Floor2_Stone", (0.85, 0.88, 0.92, 1.0), roughness=0.25, metallic=0.1, texture_path=tex_floor2)
+mat_floor2 = builder.get_or_create_material("Mat_Floor2_Stone", (0.96, 0.96, 0.97, 1.0), roughness=0.18, metallic=0.05, texture_path=tex_floor2)
 mat_exterior_stone = builder.get_or_create_material("Mat_Exterior_Stone", (0.88, 0.88, 0.90, 1.0), roughness=0.75, metallic=0.02)
 mat_interior_walls = builder.get_or_create_material("Mat_Interior_Walls", (0.94, 0.94, 0.95, 1.0), roughness=0.85, metallic=0.0)
 mat_navy_accent = builder.get_or_create_material("Mat_Navy_Accent", (0.04, 0.12, 0.28, 1.0), roughness=0.35, metallic=0.1)
