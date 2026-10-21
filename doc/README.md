@@ -16,7 +16,8 @@ doc/
 ├── 1_project_architecture.md                  # System architecture, multi-tier pipeline, mathematical models & Mermaid diagrams
 ├── 2_working_and_components.md                # System runtime lifecycle, 3D graphics components, 2D UI components & state store
 ├── 3_references_and_citations.md              # Curatorial provenance manifest, institutional sources & formal IEEE/APA citations
-└── 4_results_and_performance_benchmarks.md     # Empirical profiling, frame-time latency, memory footprints & comparative metrics
+├── 4_results_and_performance_benchmarks.md     # Empirical profiling, frame-time latency, memory footprints & comparative metrics
+└── deployment.md                              # Netlify production deployment plan, CI/CD pipelines & asset configurations
 ```
 
 ---
@@ -54,3 +55,10 @@ doc/
 - **Memory & VRAM Allocation**: Stable JS heap footprint ($62.4\,\text{MB}$) and GPU VRAM footprint ($384\,\text{MB}$).
 - **Network Transfer & Web Vitals**: Total compressed delivery payload of **$15.29\,\text{MB}$**, achieving **Google Lighthouse Score of 96/100** with an LCP of $2.15\,\text{s}$ and INP of $38\,\text{ms}$.
 - **Comparative Matrix**: Empirical benchmark table evaluating R3F v2.0 against the legacy A-Frame v1.0 prototype.
+
+### [5. Netlify Deployment Plan (`deployment.md`)](file:///c:/Users/Abhyuday/Documents/..PROJECTS/virtumuseum/doc/deployment.md)
+- **Deployment Architecture**: JAMstack Edge CDN distribution, automated TLS/HTTPS provisioning, and HTTP Range (byte serving) for 3D binary streaming.
+- **Static Asset Resolution**: Post-build mirroring strategy preventing 404s on string-referenced assets (`/src/assets/...`, `/scripts/...`).
+- **Production Configuration (`netlify.toml`)**: Exact build commands, publish directory (`dist`), SPA redirects (`/* -> /index.html 200`), and immutable HTTP cache headers.
+- **Dual Deployment Workflows**: Continuous Git-integrated CI/CD (Workflow 1) and terminal Netlify CLI deployment (Workflow 2).
+- **Verification Runbook**: 10-point smoke testing checklist and troubleshooting solutions for WebGL contexts, Autoplay audio restrictions, and memory limits.
