@@ -193,3 +193,21 @@ Exhibits are defined in [src/data/museumContent.js](file:///c:/Users/Abhyuday/Do
   position: [12.0, 1.8, -4.0] // 3D world coordinate for nearest exhibit 'E' raycasting
 }
 ```
+
+---
+
+## Implementation Pictures
+
+The implementation screenshots showcase the virtual museum's welcome experience, interactive map, guided tour, and second-floor exhibits.
+
+![Welcome view of the virtual museum](implementation/welcome.png)
+The welcome screen introduces visitors to the immersive VIT virtual museum experience.
+
+![Interactive virtual museum map](implementation/virtualMap.png)
+The interactive map helps visitors navigate the museum layout and locate key areas.
+
+![Guided tour stop in the virtual museum](implementation/tourStop.png)
+The guided tour view presents visitors with contextual information at each museum stop.
+
+![Second-floor virtual museum view](implementation/secondFloor.png)
+The second-floor view highlights the museum's upper-level exhibits and interactive environment.
